@@ -136,3 +136,44 @@ nginx -s reload  ##平滑重启
 ```
 
 ### 二、Nginx配置文件语法
+
+#### 1. 基本说明
+
+设置vim下conf文件的高亮：
+
+```shell
+mkdir -p ~/.vim
+cp -p /usr/local/nginx/contrib/vim/*  ~/.vim/
+```
+
+```
+配置文件 : nginx的conf目录下的 nginx.conf
+```
+
+花括号{}之外的是全局配置参数，花括号{}内部的是局部配置参数
+
+![image-20221019211142518](C:\Users\hp-pc\AppData\Roaming\Typora\typora-user-images\image-20221019211142518.png)
+
+
+
+#### 2. conf 文件语法
+
+- 每行语句都必须以分号" ; "结尾，指令和参数之间必须以空格分割
+- 使用#进行注释
+- 支持`$变量名`语法格式，相当于解引用符号，即对应该变量的值
+- 支持include指令，可以使用include指令将其他配置文件的配置信息导入当前配置文件。include指令的插入位置不限定。
+- 部分指令支持正则表达式
+
+#### 3. 重要配置参数
+
+```nginx
+## 设置Nginx工作线程所属的用户和用户组(可以保护其他用户的重要数据)
+user www www
+
+## 设置nginx的进程数，建议设置为系统的总核心数
+worker_processes 8
+
+#  全局错误日志定义类型 日志等级 [debug | info | notice | warn | error | crit]
+error_log /usr/local/nginx/logs/error.log info;   ##设置日志路径,日志等级为info
+```
+
