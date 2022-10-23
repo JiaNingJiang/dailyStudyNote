@@ -19,46 +19,6 @@ https://github.com/protocolbuffers/protobuf/releases
 #### 2. 安装go专属的protoc生成器
 
 ```go
-go get github.com/golang/protobuf/protoc-gen-go
-```
-
-##### 错误情况一：
-
-
-```go
-报错：go get: module github.com/golang/protobuf/protoc-gen-go: Get
-“https://proxy.golang.org/github.com/golang/protobuf/protoc-gen-go/@v/list”:
-dial tcp 142.251.42.241:4 43: connectex: A connection attempt failed
-because the connected party did not properly respond after a period of
-time, or established connection failed because connected host has
-failed to respond.
-```
-
-##### 解决办法，先执行如下两条命令：
-
-```go
-go env -w GO111MODULE=on
-go env -w GOPROXY=https://goproxy.cn,direct
-```
-
-##### 错误情况二：
-
-```go
-报错： go: module github.com/golang/protobuf is deprecated: Use the
-“google.golang.org/protobuf” module instead. go get: installing
-executable with ‘go get’ in module mode is deprecated.
-Use ‘go install pkg@version’ instead.
-For more information, see https://golang.org/doc/go-get-install-deprecation
-or run ‘go help get’ or ‘go help install’.
-```
-
-##### 解决办法，报了两个错误：
-
-现在想要拉取protoc-gen-go需要去google.golang.org/protobuf拉取，原来的路径已经废弃了。
-使用的go版本是1.17。而Go1.17版使用go install安装依赖。所以应该按照它下面的格式go install pkg@version进行拉取。
-所以拉取命令如下：
-
-```go
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 ```
 
@@ -284,7 +244,7 @@ RPC调用过程可以分为四个阶段，分别是服务暴露过程、服务�
 
 ![image-20221015160210084](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20221015160210084.png)
 
-**Provider端的应用服务信息包括Provider端的地址、端口、应用服务需要暴露的接口定义信息等**。Provider 端除了会在应用服务启动的时候将服务信息注册到注册中心，还会与注册中心**保持心跳保活如果Provider端某个节点异常下线**，注册中心在一段时间的保活检查后，就会**将该节点的信息从注册中心中移除，防止Consumer端把请求发送到该下线的节点上**。因为业务迭代迅速，服务端的服务变动及上下线很频繁，通过注册中心管理服务的地址信息可以让客户端动态地感知服务变动，并且**客户端不需要再显式地配置服务端地址，只要配置注册中心地址即可，而注册中心集群一般不会变动**。注册中心的内容会在后续更新介绍。
+**Provider端的应用服务信息包括Provider端的地址、端口、应用服务需要暴露的接口定义信息等**。Provider 端除了会在应用服务启动的时候将服务信息注册到注册中心，还会与注册中心**保持心跳保活,如果Provider端某个节点异常下线**，注册中心在一段时间的保活检查后，就会**将该节点的信息从注册中心中移除，防止Consumer端把请求发送到该下线的节点上**。因为业务迭代迅速，服务端的服务变动及上下线很频繁，通过注册中心管理服务的地址信息可以让客户端动态地感知服务变动，并且**客户端不需要再显式地配置服务端地址，只要配置注册中心地址即可，而注册中心集群一般不会变动**。注册中心的内容会在后续更新介绍。
 
 ##### 3.2 服务发现的过程
 
@@ -298,7 +258,7 @@ RPC调用过程可以分为四个阶段，分别是服务暴露过程、服务�
 
 ##### 3.3 服务引用的过程
 
-**服务引用的过程发生在服务发现之后**，当Consumer端通过服务发现获取所有服务提供者的地址后，通过负载均衡策略选择其中一个服务提供者的节点进行服务引用。**服务引用的过程就是与某一个服务节点建立连接，以及在Consumer端创建接口的代理的过程其中建立连接也就是两端的RPCRuntime 建立连接的过程。**
+**服务引用的过程发生在服务发现之后**，当Consumer端通过服务发现获取所有服务提供者的地址后，通过负载均衡策略选择其中一个服务提供者的节点进行服务引用。**服务引用的过程就是与某一个服务节点建立连接，以及在Consumer端创建接口的代理的过程。其中建立连接也就是两端的RPCRuntime 建立连接的过程。**
 
 ##### 3.4 方法调用的过程
 
@@ -344,3 +304,131 @@ RPC调用过程可以分为四个阶段，分别是服务暴露过程、服务�
 - GRPC-WEB:https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-WEB.md
 
 #### 2. gRPC使用实例
+
+下载grpc插件：
+
+```go
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+```
+
+这样，protoc-gen-go-grpc.exe可执行程序会被下载到 GOPATH/bin 目录下。
+
+编写一个用于测试的 proto 文件 ( grpc_product.proto  ):
+
+```protobuf
+syntax = "proto3";
+
+option go_package = "../service";
+
+package service;
+
+message ProductRequest{
+
+  uint32 req_id = 1;
+}
+message ProductResponse{
+
+  uint32 res_id = 1;
+}
+
+//rpc服务接口,包括所有rpc服务方法
+service ProductService {
+  rpc service(ProductRequest) returns (ProductResponse);  //注册的服务,根据传入的ProductRequest返回一个ProductResponse
+}
+```
+
+使用protoc-gen-go-grpc.exe生成rpc service相关go文件(同时也要调用protoc-gen-go.exe生成message相关go文件)：
+
+```shell
+protoc --go_out=.  --go-grpc_out=.  .\grpc_product.proto
+```
+
+> 注：protoc-gen-go.exe生成message的相关go文件，protoc-gen-go-grpc.exe生成service相关go文件
+
+下面给出 `rpc服务端` 代码：
+
+```go
+1 package main
+2 import (
+3 	"fmt"
+4	"google.golang.org/grpc"
+5	"net"
+6	"probuff_test/service"
+7 )
+8 func main() {
+9	rpcService := grpc.NewServer() //生成rpc服务端对象
+10	ServiceObject := new(service.ServiceProduct)  //实例化一个对象，该对象实现了ProductServiceServer接口
+11	service.RegisterProductServiceServer(rpcService, ServiceObject) //为rpc服务端对象注册服务(也就是将上述对象的方法作为回调函数)
+12	listen, err := net.Listen("tcp", "127.0.0.1:10101")
+13	if err != nil {
+14		fmt.Printf("Listening is err: %v\n", err)
+15		return
+16	}
+17	if err := rpcService.Serve(listen); err != nil { //rpc服务端对象进行服务暴露(监听对应tcp地址)
+18		fmt.Printf("rpc server expose is err: %v\n", err)
+19		return
+20	}
+21 }
+```
+
+注意：
+
+- 第10行我们new了一个service.ServiceProduct类的对象ServiceObject，它实现了ProductServiceServer接口(需要我们手动进行实现)，这个接口就是我们在 grpc_product.proto给出的  ProductService 的service 通过 protoc-gen-go-grpc.exe 工具生成的。
+- 11行就是为我们生成的rpcService绑定这个ServiceObject对象，此对象中被实现的接口方法会作为回调函数在rpc服务端被远程调用时启动。
+
+下面给出`service.ServiceProduct类`的实现：
+
+```go
+package service
+import "context"
+
+// 实现服务器的grpc接口(ProductServiceServer接口)
+type ServiceProduct struct {
+}
+func (sp *ServiceProduct) Service(context context.Context, req *ProductRequest) (*ProductResponse, error) {
+	result := sp.GetResult(req.ReqId)
+	return &ProductResponse{ResId: result}, nil
+}
+func (sp *ServiceProduct) mustEmbedUnimplementedProductServiceServer() {
+
+}
+func (sp *ServiceProduct) GetResult(reqID uint32) uint32 {
+	return (reqID + 100)
+}
+```
+
+最后给出`rpc客户端`的实现：
+
+```go
+package main
+import (
+	"context"
+	"fmt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"probuff_test/service"
+)
+func main() {
+	dial, err := grpc.Dial(":10101", grpc.WithTransportCredentials(insecure.NewCredentials())) //客户端连接服务器
+	if err != nil {
+		fmt.Println("RPC Client dial Service is err: ", err)
+		return
+	}
+	defer dial.Close()
+
+	client := service.NewProductServiceClient(dial)   //根据conn socket实例化一个rpc客户端对象
+	response, err := client.Service(context.Background(), &service.ProductRequest{ReqId: 100}) //rpc客户端向rpc服务端发送ProductRequest请求，然后获取ProductResponse。整个过程就是在本地调用Service方法
+	if err != nil {
+		fmt.Println("rpc client request is err: ", err)
+		return
+	}
+	fmt.Printf("remoter call is succeed, resid :%v\n", response.ResId)  //显示ProductResponse回应结果
+}
+
+```
+
+#### 3. 安全传输
+
+客户端与服务端之间的rpc调用，我们可以通过加入证书的方式，实现调用的安全性。
+
+grpc使用的证书来自于TLS协议，关于TLS协议相关内容请阅读：SSL/TLS/HTTPS详解。
