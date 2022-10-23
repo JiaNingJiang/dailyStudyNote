@@ -1,4 +1,4 @@
-
+ -
 
 ### 一、protobuff
 
@@ -432,3 +432,40 @@ func main() {
 客户端与服务端之间的rpc调用，我们可以通过加入证书的方式，实现调用的安全性。
 
 grpc使用的证书来自于TLS协议，关于TLS协议相关内容请阅读：SSL/TLS/HTTPS详解。
+
+##### 3.1 生成自签证书
+
+生产环境下可以购买证书或者使用一些平台发放的免费证书
+
+- 安装openssl
+
+​		windows版本：http://slproweb.com/products/Win32OpenSSL.html
+
+​		配置PATH环境变量
+
+![image-20221023161644843](C:\Users\hp-pc\AppData\Roaming\Typora\typora-user-images\image-20221023161644843.png)
+
+```
+openssl version  可以查看版本
+```
+
+- 生成私钥文件
+
+```shell
+openssl genrsa -des3 -out ca.key 2048  ##需要输入密码
+```
+
+- 创建证书请求
+
+```shell
+openssl req  -new  -key server.key -out server.csr
+```
+
+- 生成ca.crt
+
+```shell
+openssl x509 -req -days 365 -in server.csr -signkey  server.key -out ca.crt
+```
+
+找到openssl.conf文件：
+
