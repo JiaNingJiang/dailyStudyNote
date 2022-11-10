@@ -1,0 +1,6 @@
+{"L":"INFO","T":"2022-11-10 19:41:05","C":"06_ProductionUse/ProductionUse.go:60","M":"[initLogger] zap plugin initializing completed"}
+{"L":"INFO","T":"2022-11-10 19:41:06","C":"06_ProductionUse/ProductionUse_test.go:24","M":"Info log 0{level 15 0 1231231231 <nil>}"}
+{"L":"INFO","T":"2022-11-10 19:41:07","C":"06_ProductionUse/ProductionUse_test.go:24","M":"Info log 1{level 15 0 1231231231 <nil>}"}
+{"L":"INFO","T":"2022-11-10 19:59:26","C":"06_ProductionUse/ProductionUse.go:60","M":"[initLogger] zap plugin initializing completed"}
+{"L":"INFO","T":"2022-11-10 19:59:27","C":"06_ProductionUse/ProductionUse_test.go:24","M":"Info log 0"}
+{"L":"INFO","T":"2022-11-10 19:59:28","C":"06_ProductionUse/ProductionUse_test.go:24","M":"Info log 1"}
