@@ -37,14 +37,14 @@ cd /usr/local
 mkdir nginx
 cd nginx
 wget http://nginx.org/download/nginx-1.23.1.tar.gz
-tar -xvf nginx-1.13.7.tar.gz 
+tar -xvf nginx-1.23.1.tar.gz 
 ```
 
 编译：
 
 ```shell
 # 进入nginx目录
-/usr/local/nginx/nginx-1.13.7
+/usr/local/nginx/nginx-1.23.1
 # 执行命令
 ./configure    // ./configure --help 可以查看各种编译帮助信息(可以开启Nginx的特殊功能)
 # 执行make命令
