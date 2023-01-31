@@ -16,7 +16,7 @@ SSL严格意义上将SSL是介于网络层协议和应用层协议之间的一�
 
 SSL是一个不依赖于平台和运用程序的协议，位于TCP/IP协议与各种应用层协议之间，为数据通信提高安全支持。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/2019051117402024.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70.png)
 
 ### 1. SSL加密知名协议
 
@@ -38,7 +38,7 @@ SSL是一个不依赖于平台和运用程序的协议，位于TCP/IP协议与�
 
 #### 2.1 SSL协议结构：
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174025464.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-16751690189563.png)
 
 SSL的体系结构中包含两个协议子层，其中底层是SSL记录协议层（SSL Record Protocol Layer）；高层是SSL握手协议层（SSL HandShake Protocol Layer）。
 
@@ -63,7 +63,7 @@ SSL的体系结构中包含两个协议子层，其中底层是SSL记录协议�
 
 - 在已经建立的SSL连接里安全的传输数据。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174036444.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-16751690210126.png)
 
 <center>图：SSL建立总过程</center>
 
@@ -73,7 +73,7 @@ SSL的体系结构中包含两个协议子层，其中底层是SSL记录协议�
 
 客户端首先发送ClientHello消息到服务端，服务端收到ClientHello消息后，再发送ServerHello消息回应客户端。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174041511.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-16751690226999.png)
 
 <center>图：SSL建立第一阶段报文交换示意图</center>
 
@@ -81,7 +81,7 @@ SSL的体系结构中包含两个协议子层，其中底层是SSL记录协议�
 
 握手第一步是客户端向服务端发送 Client Hello 消息，这个消息里包含了一个客户端生成的随机数 **Random1**、客户端支持的加密套件（Support Ciphers）和 SSL Version 等信息。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174137684.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516902480212.png)
 
 <center>图：ClinetHello报文抓包示例</center>
 
@@ -126,7 +126,7 @@ ClientHello中涉及到的消息具体如下：
 收到**客户端问候**之后服务器必须发送**服务器问候**信息，服务器会检查指定诸如TLS版本和算法等客户端问候的条件，如果服务器接受并支持所有条件，它将发送其证书以及其他详细信息，否则，服务器将发送握手失败消息。
 
 如果接受，第二步是服务端向客户端发送 Server Hello 消息，这个消息会从 Client Hello 传过来的 Support Ciphers 里确定一份加密套件，这个套件决定了后续加密和生成摘要时具体使用哪些算法，另外还会生成一份**随机数 Random2**。注意，至此客户端和服务端都拥有了**两个随机数（Random1+ Random2）**，这两个随机数会在后续生成对称秘钥时用到。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174146262.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516902713715.png)
 
 <center>图：ServerHello报文抓包</center>
 
@@ -175,7 +175,7 @@ ServerHello中涉及到的具体参数：
 
 服务器向客户端发送消息。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174154652.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516902919318.png)
 
 <center>图：SSL建立第二阶段报文交换示意图</center>
 
@@ -193,7 +193,7 @@ ServerHello中涉及到的具体参数：
 一般情况下，除了会话恢复时不需要发送该消息，在SSL握手的全流程中，都需要包含该消息。消息包含一个X.509证书，证书中包含公钥，发给客户端用来验证签名或在密钥交换的时候给消息加密。
 
 这一步是服务端将自己的证书下发给客户端，让客户端验证自己的身份，客户端验证通过后取出证书中的公钥。
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174211707.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516903097221.png)
 
 <center>图：服务器给客户端发送的证书报文</center>
 
@@ -201,7 +201,7 @@ ServerHello中涉及到的具体参数：
 
 根据之前在ClientHello消息中包含的CipherSuite信息，决定了密钥交换方式（例如RSA或者DH），因此在Server Key Exchange消息中便会包含完成密钥交换所需的一系列参数。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174217942.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516903237424.png)
 
 <center>图：Server Key Exchange报文</center>
 
@@ -229,7 +229,7 @@ ServerHello中涉及到的具体参数：
 
 客户端收到服务器发送的一系列消息并解析后，将本端相应的消息发送给服务器。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174238989.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516903464327.png)
 
 <center>图：SSL建立第三阶段报文交换示意图</center>
 
@@ -250,7 +250,7 @@ ServerHello中涉及到的具体参数：
 
 如果是RSA算法，会生成一个48字节的随机数，然后用server的公钥加密后再放入报文中。如果是DH算法，这次发送的就是客户端的DH参数，之后服务器和客户端根据DH算法，各自计算出相同的pre-master secret.
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174247780.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516903718430.png)
 
 <center>图：Clinet Key exchange报文</center>
 
@@ -264,7 +264,7 @@ ServerHello中涉及到的具体参数：
 
 完成握手协议，建立SSL连接。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174252475.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516903859333.png)
 
 客户机启动SSL握手第4阶段，使服务器结束。该阶段分为4步，前2个消息来自客户机，后2个消息来自服务器。
 
@@ -276,7 +276,7 @@ ServerHello中涉及到的具体参数：
 编码改变通知，表示随后的信息都将用双方商定的加密方法和密钥发送（ChangeCipherSpec是一个独立的协议，体现在数据包中就是一个字节的数据，用于告知服务端，客户端已经切换到之前协商好的加密套件（Cipher Suite）的状态，准备使用之前协商好的加密套件加密数据并传输了）。
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174259568.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516904219236.png)
 
 <center>图：Cipher Spec Message报文</center>
 
@@ -320,7 +320,7 @@ PreMaster Secret是在客户端使用RSA或者Diffie-Hellman等加密算法生�
 
 会话恢复是指只要客户端和服务器已经通信过一次，它们就可以通过会话恢复的方式来跳过整个握手阶段二、阶段三直接进行数据传输。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190511174328521.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](SSL TLS HTTPS.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM4MjY1MTM3,size_16,color_FFFFFF,t_70-167516904480139.png)
 
 <center>图：SSL会话恢复过程</center>
 
