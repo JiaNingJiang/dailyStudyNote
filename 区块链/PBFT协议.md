@@ -9,13 +9,13 @@
 
 ### 二、区块链网络与共识算法关系
 
-![image-20220705155536573](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20220705155536573.png)
+![image-20220705155536573](PBFT协议.assets/image-20220705155536573.png)
 
 区块链网络中的节点产生的区块，当验证完其中交易的真实性之后不能直接传输到整个区块链网络中。还需要经过共识算法确认后才能完成上链。
 
 ### 三、共识算法的分类
 
-![image-20220705155939883](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20220705155939883.png)
+![image-20220705155939883](PBFT协议.assets/image-20220705155939883.png)
 
 > CFT : 仅在系统中节点发生宕机时保证整个分布式系统的可靠性,不能抵御恶意节点的攻击
 >
@@ -35,7 +35,7 @@
 
 ​	基于拜占庭将军问题，PBFT算法一致性的确保主要分为这三个阶段：预准备（pre-prepare）、准备(prepare)和确认(commit)。流程如下图所示：
 
-![image-20220705170958728](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20220705170958728.png)
+![image-20220705170958728](PBFT协议.assets/image-20220705170958728.png)
 
 我们首先解释一下上面各个符号表达的意思：
 

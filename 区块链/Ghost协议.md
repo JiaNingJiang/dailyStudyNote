@@ -83,7 +83,7 @@ $$
 
 下述图是根据文献[7]的数据描绘而得的，描绘了区块大小与其传播时间之间的清晰线性关系。
 
-![image-20220926170350110](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20220926170350110.png)
+![image-20220926170350110](Ghost协议.assets/image-20220926170350110.png)
 
 可以明显的看到，区块越大传播所需要的时间就越多。
 
@@ -99,7 +99,7 @@ $$
 
 在上述两种情况下，创建的区块并不总是有助于延长主链，这使得攻击者更容易替换它。下图说明了由诚实网络创建高度分叉的块树的场景。
 
-![](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20220926171205932.png)
+![](Ghost协议.assets/image-20220926171205932.png)
 
 ​									**图2    最长链与 GHOST 选择的链不同的块树。攻击者的链能够切换最长的链，但不能切换 GHOST 选择的链**
 

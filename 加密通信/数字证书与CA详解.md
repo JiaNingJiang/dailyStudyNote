@@ -18,7 +18,7 @@
 >
 > 认证机构必须是可信的，对于“可信的第三方”，下图中会使用Trent这个名字，这个词是从trust（信任）一词演变而来的。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190830160642670.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](数字证书与CA详解.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70.png)
 
 > 下面让我们对照着上图来看一看这些步骤具体都做了些什么。
 >
@@ -29,19 +29,19 @@
 >     2.Bob在认证机构Trent注册自己的公钥
 >     
 >     	在这里Bob则将公钥发送给了认证机构Trent，这是因为Bob需要请认证机构Trent对他的公钥加上数字签名（也就是生成证书）。
->     
->         Trent收到Bob的公钥后，会确认所收到的公钥是否为Bob本人所有（参见以下专栏：身份确认和认证业务准则）
->     
->             专栏：身份确认和认证业务准则
->     
->             认证机构确认"本人"身份的方法和认证机构的认证业务准则（CertificatePractice Statement, CPS，的内容有关。如果认证机构提供的是测试用的服务，那么可能完全不会进行任何身份确认。如果是政府部门运營的认证机构，可能就需要根据法律规定来进行身份确认。如果是企业面向内部设立的认证机构，那就可能会给部门负责人打电话直接确认。
->     
->             例如，VeriSign的认证业务准则中将身份确认分为Class1 ~ 3共三个等级
->                 Class1：通过向邮箱发送件来确认本人身份
->                 Class2：通过第三方数据库来确认本人身份
->                 Class3：通过当面认证和身份证明来确认本人身份
->     
->             等级越高，身份确认越严格。
+>      	
+>     	 Trent收到Bob的公钥后，会确认所收到的公钥是否为Bob本人所有（参见以下专栏：身份确认和认证业务准则）
+>      	
+>     	     专栏：身份确认和认证业务准则
+>      	
+>     	     认证机构确认"本人"身份的方法和认证机构的认证业务准则（CertificatePractice Statement, CPS，的内容有关。如果认证机构提供的是测试用的服务，那么可能完全不会进行任何身份确认。如果是政府部门运營的认证机构，可能就需要根据法律规定来进行身份确认。如果是企业面向内部设立的认证机构，那就可能会给部门负责人打电话直接确认。
+>      	
+>     	     例如，VeriSign的认证业务准则中将身份确认分为Class1 ~ 3共三个等级
+>     	         Class1：通过向邮箱发送件来确认本人身份
+>     	         Class2：通过第三方数据库来确认本人身份
+>     	         Class3：通过当面认证和身份证明来确认本人身份
+>      	
+>     	     等级越高，身份确认越严格。
 >     
 >     3.认证机构Trent用自己的私钥对Bob的公钥施加数字签名并生成证书
 >     
@@ -239,7 +239,7 @@ CA 证书，顾名思义，就是CA颁发的证书。
 假设 C 证书信任 A 和 B；然后 A 信任 A1 和 A2；B 信任 B1 和 B2。则它们之间，构成如下的一个树形关系（一个倒立的树）。
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190830160711633.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](数字证书与CA详解.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70-167516905657144.png)
 
 ```
 处于最顶上的树根位置的那个证书，就是“根证书”。除了根证书，其它证书都要依靠上一级的证书，来证明自己。那谁来证明“根证书”可靠捏？实际上，根证书自己证明自己是可靠滴（或者换句话说，根证书是不需要被证明滴）。
@@ -261,9 +261,9 @@ CA 证书，顾名思义，就是CA颁发的证书。
 有了证书之后，当你的浏览器在访问某个 HTTPS 网站时，会验证该站点上的 CA 证书（类似于验证介绍信的公章）。如果浏览器发现该证书没有问题（证书被某个根证书信任、证书上绑定的域名和该网站的域名一致、证书没有过期），那么页面就直接打开；否则的话，浏览器会给出一个警告，告诉你该网站的证书存在某某问题，是否继续访问该站点？下面给出 IE 和 Firefox 的抓图：
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190830160735442.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](数字证书与CA详解.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70-167516905837047.png)
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/2019083016075219.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](数字证书与CA详解.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70-167516906011850.png)
 
 ```
 2.验证某文件是否可信（是否被篡改）
@@ -273,7 +273,7 @@ CA 证书，顾名思义，就是CA颁发的证书。
 比如，俺手头有一个 Google Chrome的安装文件（带有数字签名）。当俺查看该文件的属性，会看到如下的界面。眼神好的同学，会注意到到上面有个“数字签名”的标签页。如果没有出现这个标签页，就说明该文件没有附带数字签名。
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190830160811597.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](数字证书与CA详解.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70-167516906194453.png)
 
 ```
 一般来说，签名列表中，有且仅有一个签名。选中它，点“详细信息”按钮。跳出如下界面：
@@ -281,15 +281,15 @@ CA 证书，顾名思义，就是CA颁发的证书。
 通常这个界面会显示一行字：“该数字签名正常”（图中红圈标出）。如果有这行字，就说明该文件从出厂到你手里，中途没有被篡改过（是原装滴、是纯洁滴）。如果该文件被篡改过了（比如，感染了病毒、被注入木马），那么对话框会出现一个警告提示“该数字签名无效”
 ```
 
-![>    [外链图片转存失败(img-nTQSfNiK-1567152270924)(assets/1533294414623.png)]](https://img-blog.csdnimg.cn/20190830160830910.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70)
+![>    [外链图片转存失败(img-nTQSfNiK-1567152270924)(assets/1533294414623.png)]](数字证书与CA详解.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70-167516906344256.png)
 
 不论签名是否正常，你都可以点“查看证书”按钮。这时候，会跳出证书的对话框。如下：
 
-![>    [外链图片转存失败(img-n5p5986M-1567152270925)(assets/1533294685323.png)]](https://img-blog.csdnimg.cn/20190830160852377.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70)
+![>    [外链图片转存失败(img-n5p5986M-1567152270925)(assets/1533294685323.png)]](数字证书与CA详解.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70-167516906552259.png)
 
 
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20190830160915298.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](数字证书与CA详解.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70-167516906845162.png)
 
 ```
 从后一个界面，可以看到刚才说的证书信任链。图中的信任链有3层：
@@ -328,7 +328,7 @@ PKI的组成要素主要有以下三个：
   3.仓库 — 保存证书的数据库
 ```
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/2019083016094827.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70)
+![在这里插入图片描述](数字证书与CA详解.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2xrMjY4NDc1Mw==,size_16,color_FFFFFF,t_70-167516907162565.png)
 
 ##### 用户
 

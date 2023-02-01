@@ -14,7 +14,7 @@ https://github.com/protocolbuffers/protobuf/releases
 
 将protobuf的bin目录加载到Path环境变量中
 
-![image-20221015102216926](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20221015102216926.png)
+![image-20221015102216926](gRPC.assets/image-20221015102216926.png)
 
 #### 2. 安装go专属的protoc生成器
 
@@ -24,7 +24,7 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
 安装成功后将在GOPATH/bin路径下生成protobuf的编译器插件 protoc-gen-go.exe , 执行protoc命令时会调用这个插件。
 
-![image-20221015103505630](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20221015103505630.png)
+![image-20221015103505630](gRPC.assets/image-20221015103505630.png)
 
 #### 3. 如何使用protobuff
 
@@ -119,7 +119,7 @@ protobuffer中字段规则包括一下三种：
 
 ##### 5.4 标量类型(Scalar)
 
-![image-20221015123804444](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20221015123804444.png)
+![image-20221015123804444](gRPC.assets/image-20221015123804444.png)
 
 标量类型如果没有被赋值，则不会被序列化，解析时，会赋予默认值。
 
@@ -242,7 +242,7 @@ RPC调用过程可以分为四个阶段，分别是服务暴露过程、服务�
 
   
 
-![image-20221015160210084](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20221015160210084.png)
+![image-20221015160210084](gRPC.assets/image-20221015160210084.png)
 
 **Provider端的应用服务信息包括Provider端的地址、端口、应用服务需要暴露的接口定义信息等**。Provider 端除了会在应用服务启动的时候将服务信息注册到注册中心，还会与注册中心**保持心跳保活,如果Provider端某个节点异常下线**，注册中心在一段时间的保活检查后，就会**将该节点的信息从注册中心中移除，防止Consumer端把请求发送到该下线的节点上**。因为业务迭代迅速，服务端的服务变动及上下线很频繁，通过注册中心管理服务的地址信息可以让客户端动态地感知服务变动，并且**客户端不需要再显式地配置服务端地址，只要配置注册中心地址即可，而注册中心集群一般不会变动**。注册中心的内容会在后续更新介绍。
 
@@ -264,7 +264,7 @@ RPC调用过程可以分为四个阶段，分别是服务暴露过程、服务�
 
 当服务引用完成后，Consumer端与Provider端已经建立了连接，可以进行方法的调用。
 
-![image-20221015160949212](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20221015160949212.png)
+![image-20221015160949212](gRPC.assets/image-20221015160949212.png)
 
 (1)服务消费者以本地调用方式(即以接口的方式)调用服务，它会将需要调用的方法、参数类型、参数传递给服务消费方的本地存根。
 
@@ -294,7 +294,7 @@ RPC调用过程可以分为四个阶段，分别是服务暴露过程、服务�
 
 在 gRPC 里客户端应用可以像调用本地对象一样直接调用另一台不同的机器上服务端应用的方法，使得您能够更容易地创建分布式应用和服务。与许多 RPC 系统类似，**gRPC 也是基于以下理念：定义一个服务，指定其能够被远程调用的方法（包含参数和返回类型）。在服务端实现这个接口，并运行一个 gRPC 服务器来处理客户端调用。在客户端拥有一个存根能够调用像服务端一样的方法。**
 
-![image-20221015161929530](C:\Users\DELL\AppData\Roaming\Typora\typora-user-images\image-20221015161929530.png)
+![image-20221015161929530](gRPC.assets/image-20221015161929530.png)
 
 官方网站: https://grpc.io/
 
