@@ -1,0 +1,93 @@
+info:
+  contact: {}
+  license: {}
+paths:
+  /api/v1/tags:
+    get:
+      parameters:
+      - description: Name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: State
+        in: query
+        name: state
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"data":{},"msg":"ok"}'
+          schema:
+            type: string
+      summary: Get multiple article tags
+    post:
+      parameters:
+      - description: Name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: State
+        in: query
+        name: state
+        type: integer
+      - description: CreatedBy
+        in: query
+        name: created_by
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"data":{},"msg":"ok"}'
+          schema:
+            type: string
+      summary: Add article tag
+  /api/v1/tags/{id}:
+    delete:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"data":{},"msg":"ok"}'
+          schema:
+            type: string
+      summary: Delete article tag
+    put:
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: State
+        in: query
+        name: state
+        type: integer
+      - description: ModifiedBy
+        in: query
+        name: modified_by
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"data":{},"msg":"ok"}'
+          schema:
+            type: string
+      summary: Update article tag
+swagger: "2.0"
