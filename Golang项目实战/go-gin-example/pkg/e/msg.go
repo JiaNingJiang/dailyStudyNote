@@ -11,6 +11,14 @@ var MsgFlags = map[int]string{
 	ERROR_AUTH_CHECK_TOKEN_TIMEOUT: "Token已超时",
 	ERROR_AUTH_TOKEN:               "Token生成失败",
 	ERROR_AUTH:                     "Token错误",
+
+	ERROR_UPLOAD_SAVE_IMAGE_FAIL:    "保存图片失败",
+	ERROR_UPLOAD_CHECK_IMAGE_FAIL:   "检查图片失败",
+	ERROR_UPLOAD_CHECK_IMAGE_FORMAT: "校验图片错误，图片格式或大小有问题",
+
+	ERROR_CHECK_EXIST_ARTICLE_FAIL: "检查文章是否存在出错",
+	ERROR_GET_ARTICLE_FAIL:         "获取文章失败",
+	ERROR_GET_ARTICLECOUNT_FAIL:    "获取符合条件文章数量失败",
 }
 
 func GetMsg(code int) string {

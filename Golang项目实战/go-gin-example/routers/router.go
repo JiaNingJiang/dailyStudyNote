@@ -2,12 +2,16 @@ package routers
 
 import (
 	"github.com/EDDYCJY/go-gin-example/middleware/jwt"
+	"github.com/EDDYCJY/go-gin-example/pkg/export"
+	"github.com/EDDYCJY/go-gin-example/pkg/qrcode"
 	"github.com/EDDYCJY/go-gin-example/pkg/setting"
+	"github.com/EDDYCJY/go-gin-example/pkg/upload"
 	"github.com/EDDYCJY/go-gin-example/routers/api"
 	v1 "github.com/EDDYCJY/go-gin-example/routers/api/v1"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"net/http"
 
 	_ "github.com/EDDYCJY/go-gin-example/docs"
 )
@@ -21,9 +25,27 @@ func InitRouter() *gin.Engine {
 
 	gin.SetMode(setting.ServerSetting.RunMode)
 
+	r.StaticFS("/upload/images", http.Dir(upload.GetImageFullPath()))
+	r.StaticFS("/export", http.Dir(export.GetExcelFullPath()))
+	r.StaticFS("/qrcode", http.Dir(qrcode.GetQrCodeFullPath()))
+
 	r.GET("/auth", api.GetAuth)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	r.POST("/upload", api.UploadImage)
+
+	//导出标签
+	r.POST("/tags/export", v1.ExportTag)
+
+	//导入标签
+	r.POST("/tags/import", v1.ImportTag)
+
+	// 生成二维码
+	r.POST("/poster/generate", v1.GenerateArticlePoster)
+
+	// 生成合并二维码
+	r.POST("/poster/generate/merge", v1.GenerateArticlePosterMerged)
 
 	apiv1 := r.Group("/api/v1")
 	apiv1.Use(jwt.JWT()) // 添加中间件

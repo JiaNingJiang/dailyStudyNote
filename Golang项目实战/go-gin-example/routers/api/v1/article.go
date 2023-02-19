@@ -1,15 +1,23 @@
 package v1
 
 import (
-	"github.com/EDDYCJY/go-gin-example/models"
+	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
+	"github.com/EDDYCJY/go-gin-example/pkg/qrcode"
 	"github.com/EDDYCJY/go-gin-example/pkg/setting"
 	"github.com/EDDYCJY/go-gin-example/pkg/util"
+	"github.com/EDDYCJY/go-gin-example/service/article_service"
+	"github.com/EDDYCJY/go-gin-example/service/tag_service"
 	"github.com/astaxie/beego/validation"
+	"github.com/boombuler/barcode/qr"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
-	"log"
 	"net/http"
+)
+
+const (
+	// 指定扫描QR二维码后获得的URL
+	QRCODE_URL = "https://baidu.com"
 )
 
 func GetArticle(c *gin.Context) {
@@ -18,26 +26,31 @@ func GetArticle(c *gin.Context) {
 	valid := validation.Validation{}
 	valid.Min(id, 1, "id").Message("ID必须大于0")
 
-	code := e.INVALID_PARAMS
-	var data interface{}
-	if !valid.HasErrors() {
-		if models.ExistArticleByID(id) {
-			data = models.GetArticle(id)
-			code = e.SUCCESS
-		} else {
-			code = e.ERROR_NOT_EXIST_ARTICLE
-		}
-	} else {
-		for _, err := range valid.Errors {
-			log.Printf("err.key: %s, err.message: %s", err.Key, err.Message)
-		}
+	appG := app.Gin{c}
+	if valid.HasErrors() {
+		app.MarkErrors(valid.Errors)
+		appG.Response(http.StatusOK, e.INVALID_PARAMS, nil)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": data,
-	})
+	articleService := article_service.Article{ID: id}
+	exist, err := articleService.ExistByID()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_CHECK_EXIST_ARTICLE_FAIL, nil)
+		return
+	}
+	if !exist {
+		appG.Response(http.StatusOK, e.ERROR_NOT_EXIST_ARTICLE, nil)
+		return
+	}
+
+	article, err := articleService.Get()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_GET_ARTICLE_FAIL, nil)
+		return
+	}
+
+	appG.Response(http.StatusOK, e.SUCCESS, article)
 }
 
 func GetArticles(c *gin.Context) {
@@ -62,24 +75,32 @@ func GetArticles(c *gin.Context) {
 		valid.Min(tagId, 1, "tag_id").Message("标签ID必须大于0")
 	}
 
-	code := e.INVALID_PARAMS
-	if !valid.HasErrors() {
-		code = e.SUCCESS
-
-		data["lists"] = models.GetArticles(util.GetPage(c), setting.AppSetting.PageSize, maps)
-		data["total"] = models.GetArticleTotal(maps)
-
-	} else {
-		for _, err := range valid.Errors {
-			log.Printf("err.key: %s, err.message: %s", err.Key, err.Message)
-		}
+	appG := app.Gin{c}
+	if valid.HasErrors() {
+		app.MarkErrors(valid.Errors)
+		appG.Response(http.StatusOK, e.INVALID_PARAMS, nil)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": data,
-	})
+	articleService := article_service.Article{State: state, TagID: tagId,
+		PageSize: setting.AppSetting.PageSize,
+		PageNum:  util.GetPage(c)}
+
+	articles, err := articleService.GetArticles()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_GET_ARTICLE_FAIL, nil)
+		return
+	}
+	articlesCount, err := articleService.Count()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_GET_ARTICLECOUNT_FAIL, nil)
+		return
+	}
+
+	data["lists"] = articles
+	data["total"] = articlesCount
+
+	appG.Response(http.StatusOK, e.SUCCESS, data)
 }
 
 func AddArticle(c *gin.Context) {
@@ -98,33 +119,49 @@ func AddArticle(c *gin.Context) {
 	valid.Required(createdBy, "created_by").Message("创建人不能为空")
 	valid.Range(state, 0, 1, "state").Message("状态只允许0或1")
 
-	code := e.INVALID_PARAMS
-	if !valid.HasErrors() {
-		if models.ExistTagByID(tagId) { // 必须保证要引用的tag标签是存在的
-			data := make(map[string]interface{})
-			data["tag_id"] = tagId
-			data["title"] = title
-			data["desc"] = desc
-			data["content"] = content
-			data["created_by"] = createdBy
-			data["state"] = state
-
-			models.AddArticle(data)
-			code = e.SUCCESS
-		} else {
-			code = e.ERROR_NOT_EXIST_TAG
-		}
-	} else {
-		for _, err := range valid.Errors {
-			log.Printf("err.key: %s, err.message: %s", err.Key, err.Message)
-		}
+	appG := app.Gin{c}
+	if valid.HasErrors() {
+		app.MarkErrors(valid.Errors)
+		appG.Response(http.StatusOK, e.INVALID_PARAMS, nil)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": make(map[string]interface{}),
-	})
+	tagService := tag_service.Tag{ID: tagId}
+
+	exist, err := tagService.ExistByID()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_CHECK_EXIST_TAG_FAIL, nil)
+		return
+	}
+	if exist {
+		appG.Response(http.StatusOK, e.ERROR_EXIST_TAG, nil)
+		return
+	}
+	articleService := article_service.Article{
+		TagID:     tagId,
+		Title:     title,
+		Desc:      desc,
+		Content:   content,
+		CreatedBy: createdBy,
+		State:     state,
+	}
+
+	err = articleService.Add()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_ADD_ARTICLE_FAIL, nil)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["tag_id"] = tagId
+	data["title"] = title
+	data["desc"] = desc
+	data["content"] = content
+	data["created_by"] = createdBy
+	data["state"] = state
+
+	appG.Response(http.StatusOK, e.SUCCESS, data)
+
 }
 
 func EditArticle(c *gin.Context) {
@@ -150,45 +187,58 @@ func EditArticle(c *gin.Context) {
 	valid.Required(modifiedBy, "modified_by").Message("修改人不能为空")
 	valid.MaxSize(modifiedBy, 100, "modified_by").Message("修改人最长为100字符")
 
-	code := e.INVALID_PARAMS
-	if !valid.HasErrors() {
-		if models.ExistArticleByID(id) { //保证要修改的文章是存在的
-			if models.ExistTagByID(tagId) { //保证要使用的tag标签是存在的
-				data := make(map[string]interface{})
-				if tagId > 0 {
-					data["tag_id"] = tagId
-				}
-				if title != "" {
-					data["title"] = title
-				}
-				if desc != "" {
-					data["desc"] = desc
-				}
-				if content != "" {
-					data["content"] = content
-				}
-
-				data["modified_by"] = modifiedBy
-
-				models.EditArticle(id, data)
-				code = e.SUCCESS
-			} else {
-				code = e.ERROR_NOT_EXIST_TAG
-			}
-		} else {
-			code = e.ERROR_NOT_EXIST_ARTICLE
-		}
-	} else {
-		for _, err := range valid.Errors {
-			log.Printf("err.key: %s, err.message: %s", err.Key, err.Message)
-		}
+	appG := app.Gin{c}
+	if valid.HasErrors() {
+		app.MarkErrors(valid.Errors)
+		appG.Response(http.StatusOK, e.INVALID_PARAMS, nil)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": make(map[string]string),
-	})
+	articleService := article_service.Article{ID: id, TagID: tagId, Title: title, Desc: desc,
+		Content: content, ModifiedBy: modifiedBy, State: state}
+	exist, err := articleService.ExistByID()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_CHECK_EXIST_ARTICLE_FAIL, nil)
+		return
+	}
+	if !exist {
+		appG.Response(http.StatusOK, e.ERROR_NOT_EXIST_ARTICLE, nil)
+		return
+	}
+
+	tagService := tag_service.Tag{ID: tagId}
+	exist, err = tagService.ExistByID()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_CHECK_EXIST_TAG_FAIL, nil)
+		return
+	}
+	if !exist {
+		appG.Response(http.StatusOK, e.ERROR_NOT_EXIST_TAG, nil)
+		return
+	}
+
+	err = articleService.Edit()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_EDIT_ARTICLE_FAIL, nil)
+		return
+	}
+
+	data := make(map[string]interface{})
+	if tagId > 0 {
+		data["tag_id"] = tagId
+	}
+	if title != "" {
+		data["title"] = title
+	}
+	if desc != "" {
+		data["desc"] = desc
+	}
+	if content != "" {
+		data["content"] = content
+	}
+	data["modified_by"] = modifiedBy
+	appG.Response(http.StatusOK, e.SUCCESS, data)
+
 }
 
 func DeleteArticle(c *gin.Context) {
@@ -197,23 +247,75 @@ func DeleteArticle(c *gin.Context) {
 	valid := validation.Validation{}
 	valid.Min(id, 1, "id").Message("ID必须大于0")
 
-	code := e.INVALID_PARAMS
-	if !valid.HasErrors() {
-		if models.ExistArticleByID(id) { //保证要删除的文章是存在的
-			models.DeleteArticle(id)
-			code = e.SUCCESS
-		} else {
-			code = e.ERROR_NOT_EXIST_ARTICLE
-		}
-	} else {
-		for _, err := range valid.Errors {
-			log.Printf("err.key: %s, err.message: %s", err.Key, err.Message)
-		}
+	appG := app.Gin{c}
+	if valid.HasErrors() {
+		app.MarkErrors(valid.Errors)
+		appG.Response(http.StatusOK, e.INVALID_PARAMS, nil)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": make(map[string]string),
+	articleService := article_service.Article{ID: id}
+	exist, err := articleService.ExistByID()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_CHECK_EXIST_ARTICLE_FAIL, nil)
+		return
+	}
+	if !exist {
+		appG.Response(http.StatusOK, e.ERROR_NOT_EXIST_ARTICLE, nil)
+		return
+	}
+
+	err = articleService.Delete()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_DELETE_ARTICLE_FAIL, nil)
+		return
+	}
+
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+}
+
+func GenerateArticlePoster(c *gin.Context) {
+	appG := app.Gin{c}
+	qrc := qrcode.NewQrCode(QRCODE_URL, 300, 300, qr.M, qr.Auto) // 返回二维码对象
+	path := qrcode.GetQrCodeFullPath()
+	_, _, err := qrc.Encode(path) // 产生QR二维码，存储到指定路径
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR, nil)
+		return
+	}
+
+	appG.Response(http.StatusOK, e.SUCCESS, nil)
+}
+
+func GenerateArticlePosterMerged(c *gin.Context) {
+	appG := app.Gin{c}
+	article := &article_service.Article{}
+	qr := qrcode.NewQrCode(QRCODE_URL, 300, 300, qr.M, qr.Auto) // 目前写死 gin 系列路径，可自行增加业务逻辑
+	posterName := article_service.GetPosterFlag() + "-" + qrcode.GetQrCodeFileName(qr.URL) + qr.GetQrCodeExt()
+	articlePoster := article_service.NewArticlePoster(posterName, article, qr)
+	articlePosterBgService := article_service.NewArticlePosterBg(
+		"bg.jpg",
+		articlePoster,
+		&article_service.Rect{
+			X0: 0,
+			Y0: 0,
+			X1: 550,
+			Y1: 700,
+		},
+		&article_service.Pt{
+			X: 125,
+			Y: 298,
+		},
+	)
+
+	_, filePath, err := articlePosterBgService.Generate() // 生成合并图片
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_GEN_ARTICLE_POSTER_FAIL, nil)
+		return
+	}
+
+	appG.Response(http.StatusOK, e.SUCCESS, map[string]string{
+		"poster_url":      qrcode.GetQrCodeFullUrl(posterName),
+		"poster_save_url": filePath + posterName,
 	})
 }

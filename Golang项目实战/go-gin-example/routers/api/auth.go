@@ -1,12 +1,12 @@
 package api
 
 import (
-	"github.com/EDDYCJY/go-gin-example/models"
+	"github.com/EDDYCJY/go-gin-example/pkg/app"
 	"github.com/EDDYCJY/go-gin-example/pkg/e"
 	"github.com/EDDYCJY/go-gin-example/pkg/util"
+	"github.com/EDDYCJY/go-gin-example/service/auth_service"
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
@@ -23,32 +23,32 @@ func GetAuth(c *gin.Context) {
 	a := auth{Username: username, Password: password}
 	ok, _ := valid.Valid(&a)
 
-	data := make(map[string]interface{})
-	code := e.INVALID_PARAMS
-	if ok {
-		isExist := models.CheckAuth(username, password)
-		if isExist {
-			token, err := util.GenerateToken(username, password)
-			if err != nil {
-				code = e.ERROR_AUTH_TOKEN
-			} else {
-				data["token"] = token
-
-				code = e.SUCCESS
-			}
-
-		} else {
-			code = e.ERROR_AUTH
-		}
-	} else {
-		for _, err := range valid.Errors {
-			log.Println(err.Key, err.Message)
-		}
+	appG := app.Gin{c}
+	if !ok {
+		app.MarkErrors(valid.Errors)
+		appG.Response(http.StatusOK, e.INVALID_PARAMS, nil)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  e.GetMsg(code),
-		"data": data,
-	})
+	authService := auth_service.Auth{Username: username, Password: password}
+	exist, err := authService.Check()
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_CHECK_EXIST_AUTO_FAIL, nil)
+		return
+	}
+	if !exist {
+		appG.Response(http.StatusOK, e.ERROR_AUTH, nil)
+		return
+	}
+
+	token, err := util.GenerateToken(username, password)
+	if err != nil {
+		appG.Response(http.StatusOK, e.ERROR_AUTH_TOKEN, nil)
+		return
+	}
+
+	data := make(map[string]interface{})
+	data["token"] = token
+
+	appG.Response(http.StatusOK, e.SUCCESS, data)
 }

@@ -7,14 +7,18 @@ import (
 )
 
 type App struct {
-	JwtSecret       string
-	PageSize        int
+	JwtSecret string
+	PageSize  int
+	PrefixUrl string // 统一化（图片和Excel文件）
+
 	RuntimeRootPath string
 
-	ImagePrefixUrl string
 	ImageSavePath  string
 	ImageMaxSize   int
 	ImageAllowExts []string
+
+	ExportSavePath string // Excel的保存地址
+	QrCodeSavePath string // 二维码保存地址
 
 	LogSavePath string
 	LogSaveName string
@@ -44,6 +48,16 @@ type Database struct {
 
 var DatabaseSetting = &Database{} // 大写，作为全局配置对象
 
+type Redis struct {
+	Host        string
+	Password    string
+	MaxIdle     int
+	MaxActive   int
+	IdleTimeout time.Duration
+}
+
+var RedisSetting = &Redis{}
+
 func Setup() {
 	Cfg, err := ini.Load("conf/app.ini")
 	if err != nil {
@@ -69,4 +83,12 @@ func Setup() {
 	if err != nil {
 		log.Fatalf("Cfg.MapTo DatabaseSetting err: %v", err)
 	}
+
+	err = Cfg.Section("redis").MapTo(RedisSetting)
+	if err != nil {
+		log.Fatalf("Cfg.MapTo ServerSetting err: %v", err)
+	}
+
+	RedisSetting.IdleTimeout = RedisSetting.IdleTimeout * time.Second
+
 }
