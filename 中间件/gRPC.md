@@ -62,7 +62,7 @@ message User{
 protoc --go_out=.  .\pb.proto  //--go_out=. 不能存在任何空格
 ```
 
---go_out=./ 与 option go_package 共同指定编译后生成的go文件存放的位置：首先切换路径go_out指定的目录，依次为基础切换到option go_package指定路径下创建对应目录和go源文件
+--go_out=./ 与 option go_package 共同指定编译后生成的go文件存放的位置：首先切换到路径go_out指定的目录，依次为基础切换到option go_package指定路径下创建对应目录和go源文件
 
 ##### 4.使用新产生的go文件转化后的User消息
 
@@ -121,7 +121,7 @@ protobuffer中字段规则包括一下三种：
 
 ![image-20221015123804444](gRPC.assets/image-20221015123804444.png)
 
-标量类型如果没有被赋值，则不会被序列化，解析时，会赋予默认值。
+标量类型如果没有被赋值，则不会被序列化，反序列化解析时，会赋予默认值。
 
 - strings：空字符串
 - bytes：空序列
