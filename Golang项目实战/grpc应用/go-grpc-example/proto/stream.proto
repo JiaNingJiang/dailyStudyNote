@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "./stream";
+
+package stream;
+
+service StreamService {
+  rpc List(StreamRequest) returns (stream StreamResponse) {};   // 返回值为stream类型
+
+  rpc Record(stream StreamRequest) returns (StreamResponse) {};  // 请求值为stream类型
+
+  rpc Route(stream StreamRequest) returns (stream StreamResponse) {};  // 请求、返回值均为stream类型
+}
+
+
+message StreamPoint {
+  string name = 1;
+  int32 value = 2;
+}
+
+message StreamRequest {
+  StreamPoint pt = 1;
+}
+
+message StreamResponse {
+  StreamPoint pt = 1;
+}
