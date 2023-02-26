@@ -18,7 +18,7 @@
 // 	protoc        v3.21.7
 // source: google/api/annotations.proto
 
-package __
+package proto
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

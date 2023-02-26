@@ -4,7 +4,7 @@
 // - protoc             v3.21.7
 // source: hello.proto
 
-package __
+package proto
 
 import (
 	context "context"
@@ -47,7 +47,7 @@ func (c *helloWorldClient) SayHelloWorld(ctx context.Context, in *HelloWorldRequ
 // for forward compatibility
 type HelloWorldServer interface {
 	SayHelloWorld(context.Context, *HelloWorldRequest) (*HelloWorldResponse, error)
-	mustEmbedUnimplementedHelloWorldServer()
+	MustEmbedUnimplementedHelloWorldServer()
 }
 
 // UnimplementedHelloWorldServer must be embedded to have forward compatible implementations.
@@ -63,7 +63,7 @@ func (UnimplementedHelloWorldServer) mustEmbedUnimplementedHelloWorldServer() {}
 // Use of this interface is not recommended, as added methods to HelloWorldServer will
 // result in compilation errors.
 type UnsafeHelloWorldServer interface {
-	mustEmbedUnimplementedHelloWorldServer()
+	MustEmbedUnimplementedHelloWorldServer()
 }
 
 func RegisterHelloWorldServer(s grpc.ServiceRegistrar, srv HelloWorldServer) {
