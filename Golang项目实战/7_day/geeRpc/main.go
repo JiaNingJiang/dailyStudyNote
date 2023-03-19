@@ -5,6 +5,7 @@ import (
 	"geeRpc/geerpc"
 	"log"
 	"net"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -25,24 +26,24 @@ func startServer(addr chan string) {
 		log.Fatal("register error:", err)
 	}
 
-	l, err := net.Listen("tcp", ":0") // ":0"的作用就是随机寻找一个空闲的端口进行监听
+	l, err := net.Listen("tcp", ":8888") // ":0"的作用就是随机寻找一个空闲的端口进行监听
 	if err != nil {
 		log.Fatal("network error:", err)
 	}
 	log.Println("start rpc server on", l.Addr())
 	addr <- l.Addr().String()
-	geerpc.Accept(l)
+	//geerpc.Accept(l)
+	geerpc.HandleHTTP() // 注册http路由
+
+	_ = http.Serve(l, nil) // 提供http服务
 }
 
-func main() {
-	addr := make(chan string)
-	go startServer(addr) // 启动RPC服务端(通过addr管道返回server端的监听地址)
-
-	client, _ := geerpc.Dial("tcp", <-addr) //创建与RPC Server连接的RPC Client
+func call(addrCh chan string) {
+	client, _ := geerpc.DialHTTP("tcp", <-addrCh)
 	defer func() { _ = client.Close() }()
 
 	time.Sleep(time.Second)
-
+	// send request & receive response
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ { // 发送 5次 RPC请求 (使用了等待组和同步方式的client.Call确保RPC请求是串行执行的)
 		wg.Add(1)
@@ -58,4 +59,10 @@ func main() {
 		}(i)
 	}
 	wg.Wait() // 所有的RPC请求都完成之后才能退出
+}
+
+func main() {
+	ch := make(chan string)
+	go call(ch)
+	startServer(ch) // 启动RPC服务端(通过addr管道返回server端的监听地址)
 }
