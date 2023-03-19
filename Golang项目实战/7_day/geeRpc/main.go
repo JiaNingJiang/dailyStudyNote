@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"geeRpc/geerpc"
 	"log"
 	"net"
@@ -9,9 +9,23 @@ import (
 	"time"
 )
 
+type Foo int
+
+type Args struct{ Num1, Num2 int }
+
+func (f Foo) Sum(args Args, reply *int) error {
+	*reply = args.Num1 + args.Num2
+	return nil
+}
+
 func startServer(addr chan string) {
-	// pick a free port
-	l, err := net.Listen("tcp", ":0")
+
+	var foo Foo
+	if err := geerpc.Register(&foo); err != nil {
+		log.Fatal("register error:", err)
+	}
+
+	l, err := net.Listen("tcp", ":0") // ":0"的作用就是随机寻找一个空闲的端口进行监听
 	if err != nil {
 		log.Fatal("network error:", err)
 	}
@@ -34,12 +48,13 @@ func main() {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			args := fmt.Sprintf("geerpc req %d", i)
-			var reply string
-			if err := client.Call("Foo.Sum", args, &reply); err != nil {
+			args := &Args{Num1: i, Num2: i * i}
+			var reply int
+			ctx, _ := context.WithTimeout(context.Background(), 5*time.Second) // RPC Client进行RPC调用时引入了超时检测机制
+			if err := client.Call(ctx, "Foo.Sum", args, &reply); err != nil {
 				log.Fatal("call Foo.Sum error:", err)
 			}
-			log.Println("reply:", reply)
+			log.Printf("%d + %d = %d", args.Num1, args.Num2, reply)
 		}(i)
 	}
 	wg.Wait() // 所有的RPC请求都完成之后才能退出

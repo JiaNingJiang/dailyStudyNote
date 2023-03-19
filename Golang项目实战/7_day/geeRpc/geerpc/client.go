@@ -1,13 +1,19 @@
 package geerpc
 
 import (
+	"bufio"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"geeRpc/codec"
+	"io"
 	"log"
 	"net"
+	"net/http"
+	"strings"
 	"sync"
+	"time"
 )
 
 var CallChanMax int = 10
@@ -137,6 +143,22 @@ func NewClient(conn net.Conn, opt *Option) (*Client, error) {
 	return newClientCodec(f(conn), opt), nil // 创建一个新的RPC客户端(构造的编解码收发器 和 Option协商消息 作为RPC Client的参数)
 }
 
+// 根据与RPC服务端已有的conn socket,向其发送CONNECT HTTP请求完成通信协议的转换(RPC过程通过http通信实现)
+func NewHTTPClient(conn net.Conn, opt *Option) (*Client, error) {
+	_, _ = io.WriteString(conn, fmt.Sprintf("CONNECT %s HTTP/1.0\n\n", defaultRPCPath))
+
+	// Require successful HTTP response
+	// before switching to RPC protocol.
+	resp, err := http.ReadResponse(bufio.NewReader(conn), &http.Request{Method: "CONNECT"}) // 向RPC Server发送CONNECT http请求,完成协议的切换(服务端会从接收到的http报文中提取RPC通信消息)
+	if err == nil && resp.Status == connected {
+		return NewClient(conn, opt) // RPC Client依旧发送RPC通信消息完成远程调用
+	}
+	if err == nil {
+		err = errors.New("unexpected HTTP response: " + resp.Status)
+	}
+	return nil, err
+}
+
 // 创建并返回一个RPC Client，并由协程负责运行与RPC Server的接收服务
 func newClientCodec(cc codec.Codec, opt *Option) *Client {
 	client := &Client{
@@ -166,23 +188,71 @@ func parseOptions(opts ...*Option) (*Option, error) {
 	return opt, nil
 }
 
-// 与RPC Server端建立网络连接，并在此基础之上创建 RPC Client并返回
-func Dial(network, address string, opts ...*Option) (client *Client, err error) {
-	opt, err := parseOptions(opts...) //
+// 封装了RPC Client和连接错误err
+type clientResult struct {
+	client *Client
+	err    error
+}
+
+// 用户自定义方法：根据conn socket生成RPC Client
+type newClientFunc func(conn net.Conn, opt *Option) (client *Client, err error)
+
+func dialTimeout(f newClientFunc, network, address string, opts ...*Option) (client *Client, err error) {
+	opt, err := parseOptions(opts...)
 	if err != nil {
 		return nil, err
 	}
-	conn, err := net.Dial(network, address) // 与RPC Service建立通信，返回conn socket
+	conn, err := net.DialTimeout(network, address, opt.ConnectTimeout) // 带有超时检测的连接
 	if err != nil {
 		return nil, err
 	}
 	// close the connection if client is nil
 	defer func() {
-		if client == nil { // defer机制，在调用defer之前和return之后会完成对返回值的赋值，因此此处调用client其不会为空
+		if err != nil {
 			_ = conn.Close()
 		}
 	}()
-	return NewClient(conn, opt)
+	ch := make(chan clientResult)
+	go func() {
+		client, err := f(conn, opt)                  // 根据已有的conn socket生成RPC Client
+		ch <- clientResult{client: client, err: err} // 如果RPC Client生成成功，则通过管道ch传出
+	}()
+	if opt.ConnectTimeout == 0 { // 如果没有设置超时检测时间，则会一直阻塞等待RPC Client生成成功
+		result := <-ch
+		return result.client, result.err
+	}
+	select {
+	case <-time.After(opt.ConnectTimeout): // 在规定的超时检测时间范围内，没有完成与服务器的连接并创建RPC Client，则返回超时错误
+		return nil, fmt.Errorf("rpc client: connect timeout: expect within %s", opt.ConnectTimeout)
+	case result := <-ch: // 在超时检测时间范围内完成RPC Client的生成
+		return result.client, result.err
+	}
+}
+
+// 支持多种协议来完成RPC远程调用
+func XDial(rpcAddr string, opts ...*Option) (*Client, error) {
+	parts := strings.Split(rpcAddr, "@")
+	if len(parts) != 2 {
+		return nil, fmt.Errorf("rpc client err: wrong format '%s', expect protocol@addr", rpcAddr)
+	}
+	protocol, addr := parts[0], parts[1]
+	switch protocol {
+	case "http":
+		return DialHTTP("tcp", addr, opts...)
+	default:
+		// tcp, unix or other transport protocol
+		return Dial(protocol, addr, opts...)
+	}
+}
+
+// 与RPC Server端建立网络连接，并在此基础之上创建 RPC Client并返回
+func Dial(network, address string, opts ...*Option) (client *Client, err error) {
+	return dialTimeout(NewClient, network, address, opts...)
+}
+
+// 基于HTTP通信完成RPC
+func DialHTTP(network, address string, opts ...*Option) (*Client, error) {
+	return dialTimeout(NewHTTPClient, network, address, opts...)
 }
 
 // 向RPC Server 发送 RPC请求(Call)
@@ -227,12 +297,24 @@ func (client *Client) Go(serviceMethod string, args, reply interface{}, done cha
 		Reply:         reply,
 		Done:          done,
 	}
-	go client.send(call) // 无需等待发送完成，Call.Done通常是在接收到RPC Server的回复是才会接收到信号
+	go client.send(call) // 无需等待发送完成，管道Call.Done通常是在接收到RPC Server的回复时才会接收到信号
 	return call
 }
 
 // 收发同步。同一个RPC请求Call的发送与接收是同步的，RPC Client在完成RPC请求的发送之后，必须等到Call.Done中接收到信号(意味着本次RPC请求被完成)才会退出本方法
-func (client *Client) Call(serviceMethod string, args, reply interface{}) error {
-	call := <-client.Go(serviceMethod, args, reply, make(chan *Call, 1)).Done
-	return call.Error
+// func (client *Client) Call(serviceMethod string, args, reply interface{}) error {
+// 	call := <-client.Go(serviceMethod, args, reply, make(chan *Call, 1)).Done
+// 	return call.Error
+// }
+
+// 收发同步，但是附加了超时检测机制（超时检测由Call的上一级Context负责）
+func (client *Client) Call(ctx context.Context, serviceMethod string, args, reply interface{}) error {
+	call := client.Go(serviceMethod, args, reply, make(chan *Call, 1))
+	select {
+	case <-ctx.Done(): // 接收到父Context的超时检测信号，删除当前正在等待完成处理的RPC Call
+		client.removeCall(call.Seq)
+		return errors.New("rpc client: call failed: " + ctx.Err().Error())
+	case call := <-call.Done:
+		return call.Error
+	}
 }
