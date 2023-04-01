@@ -44,7 +44,7 @@ var DefaultOption = &Option{
 
 // RPC Server类
 type Server struct {
-	serviceMap sync.Map // 保存当前RPC Server所有的所有service (key -> service.Name  value -> service )
+	serviceMap sync.Map // 保存当前RPC Server所有的所有服务实例 (key -> service.Name  value -> service )
 }
 
 // NewServer returns a new Server.

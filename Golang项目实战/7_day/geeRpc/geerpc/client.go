@@ -37,7 +37,7 @@ type Client struct {
 	opt      *Option     // 协商请求
 	sending  sync.Mutex  // 保证请求的有序发送，即防止出现多个请求报文混淆
 	header   codec.Header
-	mu       sync.Mutex       // 包含Client客户端的状态量
+	mu       sync.Mutex       // 保护Client客户端的状态量
 	seq      uint64           // 用于给发送的请求编号，每个请求拥有唯一编号
 	pending  map[uint64]*Call //  存储未处理完的请求
 	closing  bool             // 用户主动关闭RPC连接(Client将不可用)
@@ -99,7 +99,7 @@ func (client *Client) terminateCalls(err error) {
 	}
 }
 
-// 循环(知道接收发生错误才退出循环)接收来自于RPC服务端的响应
+// 循环(直到接收发生错误才退出循环)接收来自于RPC服务端的响应
 func (client *Client) receive() {
 	var err error
 	for err == nil {
@@ -114,7 +114,7 @@ func (client *Client) receive() {
 		case h.Error != "": // 情况二：服务端在处理RPC请求时发生了错误，也意味着本次的RPC响应是无效的
 			call.Error = fmt.Errorf(h.Error)
 			err = client.cc.ReadBody(nil)
-			call.done() // 需要将对应的RPC请求从执行队列Client.pending中删除
+			call.done() // 通知RPC调用方本次调用结束
 		default: // 情况三：正常收发且处理
 			err = client.cc.ReadBody(call.Reply)
 			if err != nil {

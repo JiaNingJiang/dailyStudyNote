@@ -41,7 +41,7 @@ func (m *MethodType) NewReplyv() reflect.Value {
 	case reflect.Slice:
 		replyv.Elem().Set(reflect.MakeSlice(m.ReplyType.Elem(), 0, 0))
 	}
-	return replyv
+	return replyv // 都不是，则直接返回
 }
 
 // 映射一个rpc服务对象
@@ -68,7 +68,7 @@ func NewService(rcvr interface{}) *Service {
 // 将结构体的方法全部注册为rpc服务 methodType
 func (s *Service) registerMethods() {
 	s.Method = make(map[string]*MethodType)
-	for i := 0; i < s.Typ.NumMethod(); i++ {
+	for i := 0; i < s.Typ.NumMethod(); i++ { // 遍历该结构体的全部方法
 		method := s.Typ.Method(i)
 		mType := method.Type
 		if mType.NumIn() != 3 || mType.NumOut() != 1 { // 如果方法的传入参数个数不等于3,返回值个数不等于1 (第0个传入参数是结构体本身，返回值只有一个就是error类型)
@@ -97,9 +97,9 @@ func isExportedOrBuiltinType(t reflect.Type) bool {
 
 // 调用rpc方法并返回error
 func (s *Service) Call(m *MethodType, argv, replyv reflect.Value) error {
-	atomic.AddUint64(&m.numCalls, 1) // rpc方法调用次数 +1
-	f := m.Method.Func
-	returnValues := f.Call([]reflect.Value{s.Rcvr, argv, replyv}) // 调用rpc方法(第一个参数s.rcvr就是结构体本身)
+	atomic.AddUint64(&m.numCalls, 1)                              // rpc方法调用次数 +1
+	f := m.Method.Func                                            // 映射的方法函数本身
+	returnValues := f.Call([]reflect.Value{s.Rcvr, argv, replyv}) // 调用rpc方法(第一个参数s.rcvr就是结构体本身) -- 调用reflect.Value的Call方法，调用对应结构体的相关方法
 	if errInter := returnValues[0].Interface(); errInter != nil { // 检查是否发生err
 		return errInter.(error)
 	}

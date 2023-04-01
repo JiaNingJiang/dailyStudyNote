@@ -29,7 +29,7 @@ func (gc *GobCodec) ReadBody(body interface{}) error {
 	return gc.dec.Decode(body)
 }
 
-// 将RPC消息的消息头+消息头进行gob编码,写入到gob.Encoder指定的缓存(GobCodec.buf)中
+// 将RPC消息的消息头+消息体进行gob编码,写入到gob.Encoder指定的缓存(GobCodec.buf)中
 func (c *GobCodec) Write(h *Header, body interface{}) (err error) {
 	defer func() {
 		_ = c.buf.Flush() // 程序结束前,将gob编码后的数据Flush到缓存中
