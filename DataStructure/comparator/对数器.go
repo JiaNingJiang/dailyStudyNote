@@ -10,9 +10,9 @@ import (
 
 // 参数1：需要进行测试的排序函数
 func Comparator(f func([]int)) bool {
-	var testTime int = 5000 // 比较次数
-	var maxSize int = 100   // 测试用输入数组的最大大小
-	var maxValue int = 100  // 测试用输入数组每个元素的大小
+	var testTime int = 50000 // 比较次数
+	var maxSize int = 100    // 测试用输入数组的最大大小
+	var maxValue int = 100   // 测试用输入数组每个元素的大小
 	var succeed bool = true
 
 	for i := 0; i < testTime; i++ {

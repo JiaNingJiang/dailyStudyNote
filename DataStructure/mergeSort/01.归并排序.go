@@ -1,4 +1,4 @@
-package sort
+package mergeSort
 
 func MergeSort(arr []int) {
 	left := 0

@@ -1,4 +1,4 @@
-package sort
+package mergeSort
 
 import (
 	"fmt"

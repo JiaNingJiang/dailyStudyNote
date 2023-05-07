@@ -1,4 +1,4 @@
-package sort
+package mergeSort
 
 func SmallSum(arr []int) int {
 	left := 0
