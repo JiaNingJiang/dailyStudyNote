@@ -15,7 +15,8 @@ func TestSLinkList(t *testing.T) {
 
 	sl.Print()
 
-	copysl := CopyLinkListWithRandomP(sl)
+	//copysl := CopyLinkListWithRandomP(sl)
+	CopyLinkListWithRandomPImproved(sl)
 
-	copysl.Print()
+	sl.Print()
 }
