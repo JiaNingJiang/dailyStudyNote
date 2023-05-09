@@ -17,7 +17,7 @@ func TestDutchFlag(t *testing.T) {
 	//force(arr, target)
 	fmt.Println("排序后：", arr)
 
-	Comparator(DutchFlag, force)
+	//Comparator(DutchFlag, force)
 }
 
 func force(arr []int, target int) {

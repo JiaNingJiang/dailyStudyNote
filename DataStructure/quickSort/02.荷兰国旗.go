@@ -4,14 +4,13 @@ func DutchFlag(arr []int, target int) {
 	process2(arr, target)
 }
 
-// TODO:方法有缺陷
 func process2(arr []int, target int) {
 	leftIndex := -1
 	rightIndex := len(arr)
 	i := 0
 
 	for {
-		if i > rightIndex { // 右区域必然都是比target大的数字，没有继续向下遍历的必要
+		if i >= rightIndex { // 右区域必然都是比target大的数字，没有继续向下遍历的必要(重要：这里的rightIndex从len(arr)开始，因此是≥)
 			break
 		}
 		//if i == len(arr) {
