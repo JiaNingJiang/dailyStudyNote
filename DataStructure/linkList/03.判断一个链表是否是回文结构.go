@@ -26,7 +26,9 @@ func (s *Stack) Pop() interface{} {
 	}
 	s.Len--
 	s.Head--
-	return s.Items[s.Head]
+	data := s.Items[s.Head]
+	s.Items = s.Items[0:s.Head] // 重要：底层数组删除这个被弹出的元素
+	return data
 }
 
 func (s *Stack) Top() interface{} {
