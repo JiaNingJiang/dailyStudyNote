@@ -15,8 +15,9 @@ type Edge struct {
 }
 
 type Graph struct {
-	Nodes map[interface{}]*Node // 点集合
-	Edges map[Edge]struct{}     // 边集合
+	Source *Node                 // 一个用于遍历的起点
+	Nodes  map[interface{}]*Node // 点集合
+	Edges  map[Edge]struct{}     // 边集合
 }
 
 // 用一个二维数组构造图
@@ -29,18 +30,19 @@ func CreateGraph(matrix [][]int) *Graph {
 		to := edge[1]     // 终点
 		weight := edge[2] // 权重
 
-		fromNode := &Node{value: from}
-		toNode := &Node{value: to}
-
 		// 1. 构造起点
 		if _, ok := graph.Nodes[from]; !ok { // 当前起点不存在于点集合中，则新加
-			graph.Nodes[from] = fromNode
+
+			graph.Nodes[from] = &Node{value: from}
 		}
 		// 2.构造终点
 		if _, ok := graph.Nodes[to]; !ok { // 当前终点不存在于点集合中，则新加
-			graph.Nodes[to] = toNode
+			graph.Nodes[to] = &Node{value: to}
 		}
 		// 3.构造边(默认matrix数组中不会有重复的边)
+		fromNode := graph.Nodes[from] // 获取已有的起点(后面进行修改)
+		toNode := graph.Nodes[to]     // 获取已有的终点(后面进行修改)
+
 		edge := &Edge{from: fromNode, to: toNode, weight: weight}
 
 		fromNode.out++
@@ -50,6 +52,11 @@ func CreateGraph(matrix [][]int) *Graph {
 		toNode.in++
 
 		graph.Edges[*edge] = struct{}{}
+
+		// 4.遇到的第一个点作为source
+		if graph.Source == nil { //
+			graph.Source = fromNode
+		}
 	}
 
 	return graph
