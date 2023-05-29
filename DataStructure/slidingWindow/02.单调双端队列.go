@@ -45,7 +45,7 @@ func (mdq *MonotonicDeque) PushNew(data interface{}) {
 }
 
 // 返回当前存在记录内的最大值(递增队列)、最小值(递减队列)
-func (mdq *MonotonicDeque) Pop() interface{} {
+func (mdq *MonotonicDeque) BackPeak() interface{} {
 	data := mdq.DequeBase.Front()
 	if data != nil {
 		return mdq.dataSet[data.(int)]
