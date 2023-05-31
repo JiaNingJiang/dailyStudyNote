@@ -42,6 +42,26 @@ func (ll *LinkList) TailAdd(data interface{}) *Node {
 	return node
 }
 
+// 删除链表尾部元素,并且返回该元素值
+func (ll *LinkList) TailDel() interface{} {
+	if ll.Len == 1 {
+		data := ll.Head.Data
+		ll.Head = nil
+		ll.Len--
+		return data
+	}
+	var current *Node = ll.Head
+	for {
+		if current.Next.Next == nil {
+			data := current.Next.Data
+			current.Next = nil
+			ll.Len--
+			return data
+		}
+		current = current.Next
+	}
+}
+
 func (ll *LinkList) HeadAdd(data interface{}) {
 	node := new(Node)
 	node.Data = data

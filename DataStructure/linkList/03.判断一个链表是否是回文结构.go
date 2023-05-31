@@ -32,7 +32,11 @@ func (s *Stack) Pop() interface{} {
 }
 
 func (s *Stack) Top() interface{} {
-	return s.Items[s.Head-1]
+	if s.Head == 0 {
+		return nil
+	} else {
+		return s.Items[s.Head-1]
+	}
 }
 
 func IsNotPalindrome(ll *LinkList) bool {

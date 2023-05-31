@@ -1,5 +1,7 @@
 package binaryTree
 
+import "math"
+
 type Node struct {
 	Data  interface{}
 	Left  *Node // 左孩子节点
@@ -30,6 +32,11 @@ func newTreeWithArr(arr []int, index int) *Node {
 	if index >= len(arr) { // 重要：防止越界访问数组
 		return nil
 	}
+
+	if arr[index] == math.MinInt { // 值为math.MinInt意味当前节点不存在(按照完全二叉树的顺序)
+		return nil
+	}
+
 	node := new(Node)
 	node.Data = arr[index]
 	node.Left = newTreeWithArr(arr, index*2+1)
