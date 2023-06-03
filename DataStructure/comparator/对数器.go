@@ -43,11 +43,11 @@ func Comparator(f func([]int)) bool {
 
 func generateRandomArray(maxSize, maxValue int) []int {
 	rand.Seed(time.Now().UnixNano())
-	len := rand.Intn(maxSize) //
+	length := rand.Intn(maxSize) //
 
-	arr := make([]int, 0, len)
+	arr := make([]int, 0, length)
 
-	for i := 0; i < len; i++ {
+	for i := 0; i < length; i++ {
 		arr = append(arr, rand.Intn(maxValue))
 	}
 	return arr
