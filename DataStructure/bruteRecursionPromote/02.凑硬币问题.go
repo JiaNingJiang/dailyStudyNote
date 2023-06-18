@@ -47,10 +47,10 @@ func MinCoinMemoryCache(coinSet []int, target int) int {
 			dpMemory[i][j] = -1
 		}
 	}
-	return minCoinMemoryCacheBug(coinSet, target, 0, target, dpMemory)
+	return minCoinMemoryCache(coinSet, target, 0, target, dpMemory)
 }
 
-func minCoinMemoryCacheBug(coinSet []int, target int, index int, rest int, dpMemory [][]int) int {
+func minCoinMemoryCache(coinSet []int, target int, index int, rest int, dpMemory [][]int) int {
 	if rest == 0 { // 边界条件一:一旦凑齐target金额，立刻返回总共所需的硬币数（重要：必须在边界条件二之前）
 		dpMemory[index][0] = 0 // 等于0表示当凑齐target之和，不会额外再花任何一枚硬币
 		return 0
@@ -67,8 +67,8 @@ func minCoinMemoryCacheBug(coinSet []int, target int, index int, rest int, dpMem
 	}
 	// 缓存未命中，也就是新情况
 	// 金币不够(即rest > 0)
-	yao := minCoinMemoryCacheBug(coinSet, target, index+1, rest-coinSet[index], dpMemory)
-	buyao := minCoinMemoryCacheBug(coinSet, target, index+1, rest, dpMemory)
+	yao := minCoinMemoryCache(coinSet, target, index+1, rest-coinSet[index], dpMemory)
+	buyao := minCoinMemoryCache(coinSet, target, index+1, rest, dpMemory)
 
 	if yao == -1 && buyao == -1 {
 		dpMemory[index][rest] = -1

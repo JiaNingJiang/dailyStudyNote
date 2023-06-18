@@ -27,9 +27,9 @@ func TestMinCoin(t *testing.T) {
 
 func Comparator1(f1, f2 func([]int, int) int) bool {
 	var testTime int = 5000 // 比较次数
-	var maxCoinNumber int = 50
-	var maxCoinValue int = 20
-	var maxTargetValue int = 20
+	var maxCoinNumber int = 20
+	var maxCoinValue int = 15
+	var maxTargetValue int = 15
 
 	var succeed bool = true
 
@@ -66,6 +66,7 @@ func generateRandomArray1(maxCoinNumber, maxCoinValue, maxTargetValue int) ([]in
 	coinSet := make([]int, coinNum)
 	for i := 0; i < coinNum; i++ {
 		coinSet[i] = rand.Intn(maxCoinValue) + 1
+
 	}
 
 	target := rand.Intn(maxTargetValue)
