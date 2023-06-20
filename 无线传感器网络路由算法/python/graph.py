@@ -96,28 +96,28 @@ def create_graph(matrix):
 
 
 
-if __name__ == "__main__":
-    matrix = [
-		[1, 0, float(Role.Cluster), float(Role.BaseStation), 99.3],
-		[2, 0, float(Role.Cluster), float(Role.BaseStation), 54.5],
-        [3, 0, float(Role.Cluster), float(Role.BaseStation), 67.2],
+# if __name__ == "__main__":
+#     matrix = [
+# 		[1, 0, float(Role.Cluster), float(Role.BaseStation), 99.3],
+# 		[2, 0, float(Role.Cluster), float(Role.BaseStation), 54.5],
+#         [3, 0, float(Role.Cluster), float(Role.BaseStation), 67.2],
 
-		[1, 2, float(Role.Cluster), float(Role.Cluster), 22.4],
-		[1, 3, float(Role.Cluster), float(Role.Cluster), 7.7],
+# 		[1, 2, float(Role.Cluster), float(Role.Cluster), 22.4],
+# 		[1, 3, float(Role.Cluster), float(Role.Cluster), 7.7],
 
-		[2, 1, float(Role.Cluster), float(Role.Cluster), 22.4],
-		[2, 3, float(Role.Cluster), float(Role.Cluster), 8.9],
+# 		[2, 1, float(Role.Cluster), float(Role.Cluster), 22.4],
+# 		[2, 3, float(Role.Cluster), float(Role.Cluster), 8.9],
 
-		[3, 1, float(Role.Cluster), float(Role.Cluster), 7.7],
-		[3, 2, float(Role.Cluster), float(Role.Cluster), 8.9],
-        ]
-    graph = create_graph(matrix)
+# 		[3, 1, float(Role.Cluster), float(Role.Cluster), 7.7],
+# 		[3, 2, float(Role.Cluster), float(Role.Cluster), 8.9],
+#         ]
+#     graph = create_graph(matrix)
 
-    i = 0
-    while i < 300:
-        res = dk.Dijkstra(graph.source)
+#     i = 0
+#     while i < 300:
+#         res = dk.Dijkstra(graph.source)
 
-        for node, energy in res.items():
-            print("第{}轮 -- 节点{}剩余的能量为:{}".format(i, node.key, energy))
-        i=i+1
-        print()
+#         for node, energy in res.items():
+#             print("第{}轮 -- 节点{}剩余的能量为:{}".format(i, node.key, energy))
+#         i=i+1
+#         print()

@@ -39,34 +39,34 @@ def ClusterToCluster(RErx, REda, length, RcurE, dis, minDis):
     K = RcurE / Era
     return K * math.pow(dis, 2) / minDis
 
-if __name__ == "__main__":
-    # 1.测试能量函数是否能够正常运行
-    lbit = 4000
-    dis = 99.0
-    print("d0 = ", d0)
-    print("发送消耗的能量为: ", packetLen*EDDR_Etx(lbit, dis))
+# if __name__ == "__main__":
+#     # 1.测试能量函数是否能够正常运行
+#     lbit = 4000
+#     dis = 99.0
+#     print("d0 = ", d0)
+#     print("发送消耗的能量为: ", packetLen*EDDR_Etx(lbit, dis))
 
-    print("接收消耗的能量为: ", packetLen*EDDR_Erx(lbit))
+#     print("接收消耗的能量为: ", packetLen*EDDR_Erx(lbit))
 
-    print("融合消耗的能量为: ", packetLen*EDDR_Eda(lbit))
+#     print("融合消耗的能量为: ", packetLen*EDDR_Eda(lbit))
 
-    print()
+#     print()
 
-    # 2.测试权重计算函数是否能够正常运行
-    curE = 0.44
-    print("簇点到基站边的权重为: ", ClusterToBS(dis, curE))
+#     # 2.测试权重计算函数是否能够正常运行
+#     curE = 0.44
+#     print("簇点到基站边的权重为: ", ClusterToBS(dis, curE))
 
-    # 2.1 权重与距离成正比
-    minDis = 7.7
-    dis = 7.7
-    print("簇点到簇点的权重为: ", ClusterToCluster(EDDR_Erx(packetBit), EDDR_Eda(packetBit), packetLen, E0, dis, minDis))
-    dis = 8.9
-    print("簇点到簇点的权重为: ", ClusterToCluster(EDDR_Erx(packetBit), EDDR_Eda(packetBit), packetLen, E0, dis, minDis))
+#     # 2.1 权重与距离成正比
+#     minDis = 7.7
+#     dis = 7.7
+#     print("簇点到簇点的权重为: ", ClusterToCluster(EDDR_Erx(packetBit), EDDR_Eda(packetBit), packetLen, E0, dis, minDis))
+#     dis = 8.9
+#     print("簇点到簇点的权重为: ", ClusterToCluster(EDDR_Erx(packetBit), EDDR_Eda(packetBit), packetLen, E0, dis, minDis))
 
-    print()
-    # 2.2 权重与接收方能量成正比
-    minDis = 7.7
-    dis = 7.7
-    print("簇点到簇点的权重为: ", ClusterToCluster(EDDR_Erx(packetBit), EDDR_Eda(packetBit), packetLen, E0, dis, minDis))
-    print("簇点到簇点的权重为: ", ClusterToCluster(EDDR_Erx(packetBit), EDDR_Eda(packetBit), packetLen, E0/2, dis, minDis))
+#     print()
+#     # 2.2 权重与接收方能量成正比
+#     minDis = 7.7
+#     dis = 7.7
+#     print("簇点到簇点的权重为: ", ClusterToCluster(EDDR_Erx(packetBit), EDDR_Eda(packetBit), packetLen, E0, dis, minDis))
+#     print("簇点到簇点的权重为: ", ClusterToCluster(EDDR_Erx(packetBit), EDDR_Eda(packetBit), packetLen, E0/2, dis, minDis))
 

@@ -3,8 +3,8 @@ import eddrWeight as ew
 import graph
 import dijkstra as dk
 
-edgeMax = 1000  # 总共的上限边数
-nodeMax = 300  # 总共的节点(簇点)上限数
+edgeMax = 100  # 总共的上限边数
+nodeMax = 20 # 总共的节点(簇点)上限数
 headShare = 0.3  # 簇头节点在所有簇节点中的份额
 headMax = int(headShare * float(nodeMax))  # 簇头节点的上限个数
 
@@ -35,13 +35,13 @@ def nodeRole(p):
 # 1.先构建簇节点到基站的边
 for i in range(edgeMax):
     matrix[i] = [0.0] * 5
-    curRole = nodeRole(headShare)  # 当前源节点的身份(簇头还是普通簇节点)
-    if curRole == graph.Role.Cluster:  # 成为簇头节点，需要与基站相连
+    # curRole = nodeRole(headShare)  # 当前源节点的身份(簇头还是普通簇节点)
+    # if curRole == graph.Role.Cluster:  # 成为簇头节点，需要与基站相连
         # 1.成为簇头节点，需要与基站相连
-        if headCount < headMax:
-            random.seed()
-            matrix[i] = [float(headCount), 0.0, float(graph.Role.Cluster), float(graph.Role.BaseStation), clToBSMin + float(random.randint(0, int(clToBSMax) - int(clToBSMin)))]
-            headCount += 1
+    if headCount < headMax:
+        random.seed()
+        matrix[i] = [float(headCount), 0.0, float(graph.Role.Cluster), float(graph.Role.BaseStation), clToBSMin + float(random.randint(0, int(clToBSMax) - int(clToBSMin)))]
+        headCount += 1
 
 # 2.构建簇节点到簇节点的边
 for i in range(edgeMax):
