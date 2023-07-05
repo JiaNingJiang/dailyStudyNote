@@ -13,11 +13,11 @@
 ②如果wait>0,表示第i台洗衣机左侧需要移出wait件衣服
 2.同样的方法计算第i台洗衣机右侧 wait
 3.根据waitLeft和waitRight的不同情况，可以获得最少轮次：
-① waitLeft<0 且 waitRight<0 , 左右两侧都需要有当前i号洗衣机移入衣服，由于每轮每台机器只能移出一件衣服，因此至少需要 abs(waitLeft)+abs(waitRight) 件
+① waitLeft<0 且 waitRight<0 , 左右两侧都需要由当前i号洗衣机移入衣服，由于每轮每台机器只能移出一件衣服，因此至少需要 abs(waitLeft)+abs(waitRight) 轮
 ② waitLeft>0 且 waitRight>0 , 左右两侧都需要向当前i号洗衣机移入衣服，因为每轮一台机器可以接受若干件衣服，因此至少需要 max(abs(waitLeft),abs(waitRight))
 ③ waitLeft<0 且 waitRight>0 或者 waitLeft>0 且 waitRight<0 , 一侧需要移入衣服，一侧需要移出衣服。因此至少需要max(abs(waitLeft),abs(waitRight))
 
-通过上述的方法，计算出每一台洗衣机需要的最少轮次。接着从获得的[]wait数组中获取最大的wait，件衣物完成均匀分布时，所需要的最少轮次。
+通过上述的方法，计算出每一台洗衣机需要的最少轮次。接着从获得的[]wait数组中获取最大的wait
 ```
 
 ## 二、题目二
