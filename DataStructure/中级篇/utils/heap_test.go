@@ -18,8 +18,8 @@ func lessInt(a, b interface{}) bool {
 
 func TestGetSortIntArrFromHeap(t *testing.T) {
 	src := []interface{}{0, 1, 2, 3, 4}
-	arr := NewHeap(src, true, lessInt)     // 先构建大根堆
-	GetSortArrFromHeap(arr, true, lessInt) // 再完成堆排序
+	arr := NewHeap(src, true, lessInt) // 先构建大根堆
+	//GetSortArrFromHeap(arr, true, lessInt) // 再完成堆排序
 
 	fmt.Println(arr)
 }
@@ -46,8 +46,8 @@ func TestGetSortSpArrFromHeap(t *testing.T) {
 	src = append(src, Node{Val: 2})
 	src = append(src, Node{Val: 3})
 	src = append(src, Node{Val: 4})
-	arr := NewHeap(src, false, lessNode)     // 先构建大根堆
-	GetSortArrFromHeap(arr, false, lessNode) // 再完成堆排序
+	arr := NewHeap(src, false, lessNode) // 先构建大根堆
+	//GetSortArrFromHeap(arr, false, lessNode) // 再完成堆排序
 
 	fmt.Println(arr)
 }

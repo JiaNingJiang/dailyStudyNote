@@ -59,7 +59,7 @@ func (dmf *DymMostFreq) AddWord(word string) *DymMostFreq {
 	} else { // 单词不在小根堆上
 		if len(dmf.SmallRootHeap) < dmf.K { // 小根堆未满
 			newLoc := 0
-			dmf.SmallRootHeap, newLoc = utils.HeapInsert(dmf.SmallRootHeap, Word{Str: word, Count: 1}, false, LessWord)
+			newLoc = utils.HeapInsert(&dmf.SmallRootHeap, Word{Str: word, Count: 1}, false, LessWord)
 			dmf.SRHeapLoc[word] = newLoc
 		} else { // 小根堆已经满了，需要看堆顶元素是否可以被替换掉
 			topCount := dmf.SmallRootHeap[0].(Word).Count

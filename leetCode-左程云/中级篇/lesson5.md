@@ -192,7 +192,7 @@ func minTime(drinkedTime []int,a int,b int,index int,washLine int) int {
         return math.Min(Math.max(washLine,drinkedTime[index]) +a,drinkedTime[index] + b)
     }
     // 求出用清洗机器洗完该咖啡杯的时间点
-    wash := math.Max(washLine, drinkedTime[index])+a )
+    wash := math.Max(washLine, drinkedTime[index])+a 
     // 剩余[index+1 …… N-1]杯子变干净的时间点(这里注意：因为变干净又两种方式,所以next1不一定就比wash晚)
     next1:= minTime(drinkedTime,a,b,index+1,wash)
     // 当前第index杯子采用机器清洗的方式，完成[index……N-1]所有杯子变干净的时间点
