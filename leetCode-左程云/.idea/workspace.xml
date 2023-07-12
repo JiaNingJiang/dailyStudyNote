@@ -5,8 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="745c296a-908c-450a-8789-6ffb329a121e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/01.位运算.md" beforeDir="false" afterPath="$PROJECT_DIR$/01.位运算.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/02.二分法.md" beforeDir="false" afterPath="$PROJECT_DIR$/02.二分法.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DataStructure/中级篇/lesson6/3.背包放零食问题.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DataStructure/中级篇/lesson6/3.背包放零食问题_test.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DataStructure/中级篇/lesson6/4.按能力选合适酬薪工作.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../DataStructure/中级篇/lesson6/4.按能力选合适酬薪工作_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DataStructure/中级篇/lesson6/2.破坏三角形问题.go" beforeDir="false" afterPath="$PROJECT_DIR$/../DataStructure/中级篇/lesson6/2.破坏三角形问题.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DataStructure/中级篇/lesson6/2.破坏三角形问题_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/../DataStructure/中级篇/lesson6/2.破坏三角形问题_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,18 +23,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "go.import.settings.migrated": "true",
-    "last_opened_file_path": "C:/Users/15561"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/15561&quot;
   }
-}]]></component>
+}</component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />

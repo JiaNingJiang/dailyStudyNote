@@ -202,7 +202,7 @@ func Convert(str string) int {
     for i:=start;i<len(str);i++ {
         cur = '0' - str[i]  // 获取负数
         // 中途转化过程中，出现溢出(在下一轮的res*10会溢出或者在 +res 时会溢出)
-        if ( (res < minq) || (res == minq && cur < minr) ) {
+        if ( (res > minq) || (res == minq && cur > minr) ) {
             panic("数值溢出，无法转换")
         }
         res = res*10+cur
