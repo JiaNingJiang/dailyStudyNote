@@ -236,8 +236,8 @@ func p(exp string,desired bool,L,R int) int {
                 case "|":  // 都为false
                 res += p(exp,false,L,i-1)*p(exp,false,i+1,R)
                 case "^":
-                res += p(exp,true,L,i-1)*p(exp,false,i+1,R)
-                res += p(exp,false,L,i-1)*p(exp,true,i+1,R)
+                res += p(exp,true,L,i-1)*p(exp,true,i+1,R)
+                res += p(exp,false,L,i-1)*p(exp,false,i+1,R)
             }
         }
     }
@@ -263,16 +263,16 @@ func dpLive(exp string,desired bool) int {
         tMap[i][i] = str[i] == "1"?1:0
         fMap[i][i] = str[i] == "0"?1:0
     }
-    // 行需要隔行求，N-1 行是数字，row每次+2，这样每次访问的才都是数字
+    // 1.选择一个起点和终点，起点和终点都必须是数字
+    // 行需要隔行求，N-1 行是数字，row每次-2，这样每次访问的才都是数字
     for row := N-3;row >= 0;row-=2 {   // row表示左边界(必须是数字)
-        // 对角线上的都是数字，因此需要+2
         for col:=row+2 ; col < N ; col+=2 { //col表示右边界(必须是数字)
-            for i:=row+1; i<col;i+=2 {  // i每次都访问每一行所有的关系运算符
+            for i:=row+1; i<col;i+=2 {  // i每次都访问指定起点到终点范围内的所有关系运算符
                 // 1.计算tMap
                 switch exp[i] {
                     case "&":
-                    // 左右计算结果必须都为true
-                    tMap[row][col] += tMap[row][i-1]*tMap[i+1][col]
+                    // exp[i]左右两侧计算结果必须都为true
+                    tMap[row][col] += tMap[row][i-1]*tMap[i+1][col]   
                     case "|":
                     tMap[row][col] += tMap[row][i-1]*fMap[i+1][col]
                     tMap[row][col] += fMap[row][i-1]*tMap[i+1][col]
@@ -371,24 +371,25 @@ func maxUnique(str string) int {
 
 假设str1 == "abcdef"   str2 == "skbcdf"
 
-1.下面的dp表，列表示str1的各个字符；行表示str2的各个字符
+1.下面的dp表，行表示str1的各个字符；列表示str2的各个字符
 
 2.动态规划表dp的每一个元素 dp[i][j] 表示：
 str1中以str1[i]结尾的子串完全转化为str2中以str2[j]结尾的子串需要的代价。
 
-3.第一行表示str1的空串要与str2对应字符结尾的子串相等，那么str2的子串只能执行删除操作
+3.第一行表示str1的空串要与str2对应字符结尾的子串相等，那么str1的子串只能执行插入操作
 
 4.第一列表示str2的空串要与str1对应字符结尾的子串相等，那么str1的子串只能执行删除操作
 ```
 
-|       | 0-"s" | 1-"k" | 2-"b" | 3-"c" | 4-"d" | 5-"f" |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 0-"a" |   0   |  rc   | 2*rc  | 3*rc  | 4*rc  | 5*rc  |
-| 1-"b" |  rc   |       |       |       |       |       |
-| 2-"c" | 2*rc  |       |       |       |       |       |
-| 3-"d" | 3*rc  |       |       |       |       |       |
-| 4-"e" | 4*rc  |       |       |       |       |       |
-| 5-"f" | 5*rc  |       |       |       |       |       |
+|       |  0   | 1-"s" | 2-"k" | 3-"b" | 4-"c" | 5-"d" | 6-"f" |
+| :---: | :--: | :---: | :---: | :---: | :---: | :---: | :---: |
+|   0   |  0   |  ic   | 2*ic  | 3*ic  | 4*ic  | 5*ic  | 6*ic  |
+| 1-"a" |  rc  |       |       |       |       |       |       |
+| 2-"b" | 2*dc |       |       |       |       |       |       |
+| 3-"c" | 3*dc |       |       |       |       |       |       |
+| 4-"d" | 4*dc |       |       |       |       |       |       |
+| 5-"e" | 5*dc |       |       |       |       |       |       |
+| 6-"f" | 6*dc |       |       |       |       |       |       |
 
 ```go
 对于余下的普通位置，也就是常规的dp[i][j]的求法分为四种：
@@ -412,7 +413,7 @@ str = "dbcacbca"，删除第一个'b'、第一个'c'、第二个'c'、第二个'
 
 ```go
 1.先遍历一遍字符串，组建一个词频表
-2.准备一个变量minACSInex,用来记录每一轮中ACSII码最小的字符的下标。这个变量开始为0
+2.准备一个变量minACSIndex,用来记录每一轮中ACSII码最小的字符的下标。这个变量开始为0
 3.用一个新字符串res保留结果字符串
 3.每一轮都从头开始遍历字符串，每访问一个字符，将其在词频表中的记录--。一旦遇到词频 == 0 的情况，退出本轮循环，让res记录本轮最小ascii码的字符，res += str[minACSInex],然后将minACSInex以及其之前的字符全部变为空字符''，同时将后续字符串中的 str[minACSInex] 字符也变成空字符''
 4.接着进行下一轮循环。下一轮循环从minACSInex+1开始，重新组建词频表，然后访问。
