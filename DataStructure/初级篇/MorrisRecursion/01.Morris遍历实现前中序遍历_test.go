@@ -1,7 +1,7 @@
 package MorrisRecursion
 
 import (
-	"DataStructure/binaryTree"
+	"DataStructure/09.binaryTree"
 	"fmt"
 	"testing"
 )

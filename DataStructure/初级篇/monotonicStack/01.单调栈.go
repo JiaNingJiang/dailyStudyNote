@@ -1,7 +1,7 @@
 package monotonicStack
 
 import (
-	"DataStructure/linkList"
+	"DataStructure/08.linkList"
 	"reflect"
 )
 
