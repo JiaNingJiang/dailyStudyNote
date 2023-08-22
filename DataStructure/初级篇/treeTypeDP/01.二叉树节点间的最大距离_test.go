@@ -1,7 +1,7 @@
 package treeTypeDP
 
 import (
-	"DataStructure/binaryTree"
+	"DataStructure/09.binaryTree"
 	"fmt"
 	"math"
 	"testing"

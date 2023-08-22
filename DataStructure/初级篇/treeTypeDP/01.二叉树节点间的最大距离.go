@@ -1,6 +1,6 @@
 package treeTypeDP
 
-import "DataStructure/binaryTree"
+import "DataStructure/09.binaryTree"
 
 type Info struct {
 	maxHeight   int // 当前子树的高度

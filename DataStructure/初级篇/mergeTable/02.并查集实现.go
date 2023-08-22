@@ -1,6 +1,6 @@
 package mergeTable
 
-import "DataStructure/linkList"
+import "DataStructure/08.linkList"
 
 type Node struct {
 	Data    interface{}
