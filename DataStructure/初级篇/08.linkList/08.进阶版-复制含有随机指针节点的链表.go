@@ -29,8 +29,12 @@ func CopyLinkListWithRandomPImproved(sl *SLinkList) {
 		if index2.Next == nil {
 			break
 		}
-		index2.Random = index1.Random.Next // 重点：注意这里是 = index1.Random.Next，而不是index1.Random
-		index1 = index1.Next.Next
+		if index1.Random == nil {
+			index2.Random = nil
+		} else {
+			index2.Random = index1.Random.Next // 重点：注意这里是 = index1.Random.Next，而不是index1.Random
+		}
+		index1 = index1.Next.Next // 每个指针都是每次移动两次
 		index2 = index2.Next.Next
 	}
 
@@ -38,18 +42,19 @@ func CopyLinkListWithRandomPImproved(sl *SLinkList) {
 	current = sl.Head
 	index := 1 // 区分奇偶节点
 	for {
-		if current == nil { // 由于循环变量一次递增两次，因此这里是current == nil ,而不是current.Next == nil
+		if current.Next == nil { // 最后一个偶数节点，同时也是扩充后的最后一个节点
 			break
 		}
-		if index == 2 { // 跳过第一个奇数节点
+		if index == 2 { // 删除第一个奇数节点
 			sl.Head = current
 			sl.Len--
 		}
-		if index%2 == 0 { // 跳过奇数节点
+		if index%2 == 0 { // 对偶数节点进行处理,删除其后面的奇数节点
 			current.Next = current.Next.Next
 			sl.Len--
+			index++ // 因为下一个节点被删除了，相当于他已经被访问了,因此index+1(此时的index必然是奇数)
 		}
-		current = current.Next // 重要：这里实际上是一次跳跃了两个
+		current = current.Next // 重要：这里实际上是一次跳跃了两个(只有第一次是例外,第一次仅跳跃了一步)
 		index++
 	}
 }

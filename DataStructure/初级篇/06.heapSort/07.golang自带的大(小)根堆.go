@@ -14,10 +14,12 @@ func NewIntHeap(heap []int, form bool) *IntHeap {
 	}
 }
 
-// 必须实现sort.Interface这个接口(包括less,len,swap三个方法)
+// 1.必须实现sort.Interface这个接口(包括less,len,swap三个方法)
 func (ih *IntHeap) Len() int {
 	return len(ih.heap)
 }
+
+// 决定何种情况下将下标为i的元素放到下标为j的元素的签名
 func (ih *IntHeap) Less(i, j int) bool {
 	if ih.form { // 大根堆
 		return ih.heap[i] > ih.heap[j]
@@ -29,12 +31,12 @@ func (ih *IntHeap) Swap(i, j int) {
 	ih.heap[i], ih.heap[j] = ih.heap[j], ih.heap[i]
 }
 
-// 实现Push方法
+// 2.实现Push方法(尾插法)
 func (ih *IntHeap) Push(x interface{}) {
 	ih.heap = append(ih.heap, x.(int))
 }
 
-// 实现Pop方法（弹出底层数组的末尾值，让底层数组变为[0:n-1]）
+// 3.实现Pop方法（弹出底层数组的末尾值(而非首部值)，让底层数组变为[0:n-1]）
 func (ih *IntHeap) Pop() interface{} {
 	old := ih
 	n := len(old.heap)

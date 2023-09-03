@@ -14,6 +14,16 @@ func GetSortArrFromHeap(heap []int, form bool) {
 	}
 }
 
+func popAndheapify(heap []int, heapIndex int, form bool) int {
+
+	num := heap[0]            // 每次总是返回根堆的根节点
+	heap[0] = heap[heapIndex] // 让末尾的叶子结点替换掉根节点
+
+	// 将新的根节点下沉到合适的位置
+	heapify(heap, 0, heapIndex-1, form) // 注意：end必须是heapIndex - 1，作用是相当于heap[heapIndex]被删除
+	return num
+}
+
 func heapify(heap []int, start, end int, form bool) {
 	currentIndex := start // 对以 heap[start]为根节点的子树进行heapify
 	leftChildIndex := currentIndex*2 + 1
@@ -60,16 +70,6 @@ func heapify(heap []int, start, end int, form bool) {
 		leftChildIndex = currentIndex*2 + 1
 		rightChildIndex = currentIndex*2 + 2
 	}
-}
-
-func popAndheapify(heap []int, heapIndex int, form bool) int {
-
-	num := heap[0]            // 每次总是返回根堆的根节点
-	heap[0] = heap[heapIndex] // 让末尾的叶子结点替换掉根节点
-
-	// 将新的根节点下沉到合适的位置
-	heapify(heap, 0, heapIndex-1, form) // 注意：end必须是heapIndex - 1，作用是相当于heap[heapIndex]被删除
-	return num
 }
 
 func getMax(a, b int) int {

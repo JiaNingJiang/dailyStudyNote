@@ -18,10 +18,10 @@ func lowestAncestor(head, n1, n2 *Node) *Node {
 		return head
 	}
 	// 左右子树上只能找到n1、n2其中的一个
-	if left != nil {
+	if left != nil { // 只有左子树能找到
 		return left
 	}
-	if right != nil {
+	if right != nil { // 只有右子树能找到
 		return right
 	}
 	// n1和n2不在当前分支路线上

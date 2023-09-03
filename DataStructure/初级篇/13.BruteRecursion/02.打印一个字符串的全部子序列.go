@@ -10,7 +10,7 @@ func PrintAllSubString(str string) int {
 }
 
 func printAllSubString(str []byte, index int, subStr []byte) int {
-	if index == len(str) {
+	if index == len(str) { // 已经遍历完原字符串的所有字符
 		fmt.Println(string(subStr))
 		return 1
 	}

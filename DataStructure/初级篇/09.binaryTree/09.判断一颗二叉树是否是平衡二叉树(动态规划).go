@@ -22,7 +22,7 @@ func checkAVL(root *Node) *AVLInfo {
 
 	currentInfo := new(AVLInfo)
 	currentInfo.Height = getMax(leftInfo.Height, rightInfo.Height) + 1
-	if leftInfo.IsBalance && rightInfo.IsBalance && math.Abs(float64(leftInfo.Height-rightInfo.Height)) < 2 {
+	if leftInfo.IsBalance && rightInfo.IsBalance && math.Abs(float64(leftInfo.Height-rightInfo.Height)) <= 1 {
 		currentInfo.IsBalance = true
 	} else {
 		currentInfo.IsBalance = false

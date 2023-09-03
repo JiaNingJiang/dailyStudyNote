@@ -1,6 +1,8 @@
 package binaryTree
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func BinaryTreeDFS(tree *Tree) {
 	PreOrderTraversal(tree) // 二叉树的深度优先遍历就是先序遍历
@@ -12,6 +14,7 @@ type Queue struct {
 }
 
 func NewQueue() *Queue {
+
 	return &Queue{
 		Items: make([]interface{}, 0),
 		Len:   0,

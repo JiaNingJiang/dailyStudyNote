@@ -19,7 +19,7 @@ func process2(arr []int, target int) {
 		if arr[i] < target {
 			leftIndex++
 			swap(&arr[i], &arr[leftIndex])
-			i++ // 可以 i++ , 因为左侧区域的数字都已经经过检测，必定位于 <= target区域。
+			i++ // 可以 i++ , 因为左侧区域的数字都已经经过检测(因为整体是从左向右遍历的)，必定位于 <= target区域。
 		} else if arr[i] == target {
 			i++
 		} else {

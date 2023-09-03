@@ -25,12 +25,14 @@ func checkBSTByDP(root *Node) *BSTInfo {
 
 	if leftInfo.Max == math.MinInt { // 说明没有左孩子结点
 		greatLeft = true
+		leftInfo.Min = root.Data.(int)
 		leftInfo.Max = root.Data.(int)
 	}
 
 	if rightInfo.Min == math.MinInt { // 重要：说明没有右孩子节点（此步非常关键，用来弥补root == nil时，Min被设置成math.MinInt的缺陷）
 		lessRight = true
 		rightInfo.Min = root.Data.(int)
+		rightInfo.Max = root.Data.(int)
 	}
 
 	currentInfo := new(BSTInfo)
@@ -40,7 +42,7 @@ func checkBSTByDP(root *Node) *BSTInfo {
 		currentInfo.IsBST = false
 	}
 	currentInfo.Max = getMax(getMax(leftInfo.Max, rightInfo.Max), root.Data.(int))
-	currentInfo.Min = getMin(getMax(leftInfo.Min, rightInfo.Min), root.Data.(int))
+	currentInfo.Min = getMin(getMin(leftInfo.Min, rightInfo.Min), root.Data.(int))
 
 	return currentInfo
 }

@@ -7,7 +7,7 @@ func FindSuccessor(tree *Tree, n *Node) *Node {
 		return findSuccessor1(n.Right)
 	}
 
-	// 情况二：当前节点没有右子树，但是当前节点位于其祖先节点的左子树上
+	// 情况二：当前节点没有右子树，仅当当前节点位于某祖先节点的的左子树上时，该祖先节点是节点的后继节点；其他情况下节点无后继节点
 	hashMap := make(map[*Node]*Node, 0)
 	hashMap[tree.Root] = tree.Root
 	ancestorMapForm(hashMap, tree.Root) // 构建父子关系表

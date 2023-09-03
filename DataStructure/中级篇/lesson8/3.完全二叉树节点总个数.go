@@ -32,7 +32,7 @@ func treeTotalNode(root *utils.Node, leftDepth, rightDepth int) int {
 		// rightTotal + 左子树个数(递归求)
 		return int(rightTotal) + treeTotalNode(root.Left, getTreeDepth(root.Left.Left), getTreeDepth(root.Left.Right))
 	}
-	panic("二叉树并非完全二叉树")
+	panic("二叉树并非完全二叉树") // 右子树深度 > 左子树深度(不可能出现这种情况)
 }
 
 // 获取一颗二叉树的深度

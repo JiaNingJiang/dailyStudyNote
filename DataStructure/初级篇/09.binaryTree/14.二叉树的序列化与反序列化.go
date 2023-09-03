@@ -6,9 +6,12 @@ import (
 	"strings"
 )
 
+// 此问题的关键所在是: 如果二叉树的一条路径到底了,需要为其加上一个独特的"结束符"。
+// 反序列化时就可以从左子树转移向右子树，从右子树转移向根节点
+
 // 按照前序遍历将二叉树变为字符串
 func SerializeByPre(head *Node) string {
-	if head == nil {
+	if head == nil { // 一条路径的结束符
 		return "#_"
 	}
 	var str string

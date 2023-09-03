@@ -7,6 +7,8 @@ import (
 
 // n表示盘子的数量
 func Hanoi(n int) {
+
+	// 模拟左中右三个柱子
 	left := linkList.NewStack()
 	middle := linkList.NewStack()
 	right := linkList.NewStack()

@@ -144,13 +144,13 @@ func (ll *LinkList) Reverse2() {
 }
 
 func Recursive_reverse(head *Node) *Node {
-	if head == nil || head.Next == nil { // 边界条件,找到尾节点
+	if head.Next == nil { // 边界条件,找到尾节点
 		return head
 	}
 	newHead := Recursive_reverse(head.Next) // 不断递归，直到当前节点的后继结点是尾节点,停止递归
 
 	head.Next.Next = head // 让当前节点的后继节点指向自己
-	head.Next = nil       // 自己的新后继结点为空
+	head.Next = nil       // 因为后继节点已经指向自己，所以自己不必再指向后继节点
 
 	return newHead // newHead在递归过程中不会发生变化，永远指向尾节点(反转后的新头结点)
 }

@@ -12,11 +12,12 @@ func TestSLinkList(t *testing.T) {
 	sl.RandomAdd(1, 3)
 	sl.RandomAdd(2, 1)
 	sl.RandomAdd(3, sl.Len+1)
-
 	sl.Print()
 
-	//copysl := CopyLinkListWithRandomP(sl)
+	copysl := CopyLinkListWithRandomP(sl)
+	copysl.Print()
+
 	CopyLinkListWithRandomPImproved(sl)
-
 	sl.Print()
+
 }

@@ -36,7 +36,7 @@ func ImprovedBucketSort(arr []int) {
 		for index, _ := range count { // 重要：每一轮运行前，清空前缀和数组count
 			count[index] = 0
 		}
-		
+
 		for _, eleStr := range strArr { // 第一次遍历待排序数组(顺序无所谓)，填充前缀和数组count
 			bitCount, _ := strconv.ParseInt(string(eleStr[i]), baseNum, 32)
 			for j := int(bitCount); j < len(count); j++ { //
@@ -44,13 +44,13 @@ func ImprovedBucketSort(arr []int) {
 			}
 		}
 
-		for k := len(strArr) - 1; k >= 0; k-- { // 第二次遍历(必须从后往前)
+		for k := len(strArr) - 1; k >= 0; k-- { // 第二次遍历(必须从后往前)，相当于同时完成了入桶+出桶
 			bitCount, _ := strconv.ParseInt(string(strArr[k][i]), baseNum, 32)
 			suffixCount := count[bitCount]
-			bucket[suffixCount-1] = strArr[k]
+			bucket[suffixCount-1] = strArr[k] // 等价于有桶的后进后出(后进桶的排在后面)
 			count[bitCount]--
 		}
-		// 相当于完成了一轮 入桶+出桶。用bucket更新strArr
+		// 相当于完成了一轮 针对一位的排序。用bucket更新strArr
 		for index, eleStr := range bucket {
 			strArr[index] = eleStr
 		}

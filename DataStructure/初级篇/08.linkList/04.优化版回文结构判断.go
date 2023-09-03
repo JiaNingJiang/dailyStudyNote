@@ -28,7 +28,7 @@ func IsNotPalindromeImproved(ll *LinkList) bool {
 	left := ll.Head  // 左区域从原始链表头结点开始
 	right := newHead // 右区域从反转后链表的头结点(原本的尾节点)开始
 	for {
-		if left == slow && right == slow { // 左右指针同时到达slow才算比较结束
+		if left == slow && right == slow { // 左右指针同时到达slow才算比较结束(如果其中一个已经先到达slow,那么它会静止不动)
 			return true
 		}
 		leftData := left.Data

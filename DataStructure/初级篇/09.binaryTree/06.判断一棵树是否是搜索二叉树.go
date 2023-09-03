@@ -1,6 +1,6 @@
 package binaryTree
 
-var PreValue interface{}
+var PreValue interface{} // 初始要设置为math.MinInt，也就是要小于BST最小节点的数值
 
 func CheckBST(root *Node) bool {
 	if root == nil { // 边界条件。当前子树为空，返回true

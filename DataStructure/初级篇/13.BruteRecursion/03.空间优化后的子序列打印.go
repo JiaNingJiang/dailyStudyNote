@@ -17,7 +17,7 @@ func printAllSubStringImproved(str []byte, index int) int {
 	subStrCount += printAllSubStringImproved(str, index+1) // 要当前字符
 
 	oldData := str[index]
-	str[index] = 32
+	str[index] = 32                                        // 空格字符的ASCII码
 	subStrCount += printAllSubStringImproved(str, index+1) // 不要当前字符(将原本字符串对应位变为空格)
 
 	str[index] = oldData // 再恢复到原来的状态

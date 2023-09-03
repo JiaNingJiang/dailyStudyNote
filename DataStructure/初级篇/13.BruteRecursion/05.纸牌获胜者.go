@@ -32,6 +32,6 @@ func second(card []int, start, end int) int {
 	if start == end { // 只剩一张牌，那么作为后手就什么也拿不到
 		return 0
 	}
-	// 作为后手，只能等待先手完成选牌后再选。math.Min表示后手者总是被迫接受对自己最不利的选择
+	// 作为后手，只能等待先手完成选牌后再选。math.Min表示后手者总是被迫接受对自己最不利的选择(因为对方会做出比自己好的选择)
 	return int(math.Min(float64(first(card, start+1, end)), float64(first(card, start, end-1))))
 }
