@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
-	"sort"
+	"strings"
 )
 
 func main() {
 
-	arr := []int{1, 2, 2, 5}
+	str := "12223"
 
-	index := sort.SearchInts(arr, 3)
-	arr[index] = 3
+	subStr := "4"
 
-	fmt.Println(arr)
+	index := strings.Index(str, subStr)
+
+	fmt.Println(index)
 }
