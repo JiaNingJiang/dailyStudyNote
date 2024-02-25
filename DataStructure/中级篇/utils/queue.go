@@ -23,3 +23,11 @@ func (q *Queue) Pop() interface{} {
 	q.Len--
 	return data
 }
+
+func (q *Queue) Size() int {
+	return q.Len
+}
+
+func (q *Queue) Empty() bool {
+	return q.Size() == 0
+}
