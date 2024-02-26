@@ -8,7 +8,7 @@ import (
 
 func TestGolangHeap(t *testing.T) {
 	src := []int{14, 12, 10, 8, 7, 6}
-	form := false
+	form := true
 
 	heap := NewIntHeap(src, form)
 	heap2.Init(heap) // 初始化为大(小)根堆
