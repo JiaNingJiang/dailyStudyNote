@@ -1,7 +1,5 @@
 package mergeTable
 
-import "DataStructure/08.linkList"
-
 type Node struct {
 	Data    interface{}
 	Feature *Node // 指向所在集合的特征节点
@@ -78,7 +76,7 @@ func (ufs *UnionFindSet) Union(a, b interface{}) {
 	bNodeSetCap := ufs.SizeMap[bNodeFeature]
 
 	if aNodeSetCap >= bNodeSetCap { // 两个集合节点个数相等或者A集合节点数更多，都合并到集合a中
-		ufs.FeatureMap[bNodeFeature] = aNodeFeature
+		ufs.FeatureMap[bNodeFeature] = aNodeFeature // 单纯的将 b 集合的特征节点指向 a 集合的特征节点，b 集合的非特征节点还是指向之前的 b 集合特征节点
 		ufs.SizeMap[aNodeFeature] += ufs.SizeMap[bNodeFeature]
 		delete(ufs.SizeMap, bNodeFeature)
 	} else if aNodeSetCap < bNodeSetCap { // B集合节点数更多，都合并到集合B中
