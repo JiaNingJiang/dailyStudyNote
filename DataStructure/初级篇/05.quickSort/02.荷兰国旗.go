@@ -25,7 +25,7 @@ func process2(arr []int, target int) {
 		} else {
 			rightIndex--
 			swap(&arr[i], &arr[rightIndex])
-			//i++      // 这里不能有 i++ , 因为从右侧区域并没有进行过检测，因此移动过来的数字可能不在 <= target 范围内
+			//i++     // 这里不能有 i++ , 因为从右侧区域并没有进行过检测，因此移动过来的数字可能不在 <= target 范围内
 		}
 	}
 
