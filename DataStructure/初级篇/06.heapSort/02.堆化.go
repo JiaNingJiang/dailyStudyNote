@@ -30,7 +30,7 @@ func heapify(heap []int, start, end int, form bool) {
 	rightChildIndex := currentIndex*2 + 2
 
 	for {
-		if leftChildIndex > end { // 没有任何孩子节点(最多到heap[end-1])
+		if leftChildIndex >= end { // 没有任何孩子节点(最多到heap[end-1])
 			break
 		}
 		newRootIndex := currentIndex
