@@ -1,0 +1,8 @@
+{
+    "Name":"ZinxV0.5 Server",
+    "Host":"0.0.0.0",
+    "TcpPort":8080,
+    "MaxConn":1,
+    "MaxPacketSize":512,
+    "WorkerPoolSize":10
+}

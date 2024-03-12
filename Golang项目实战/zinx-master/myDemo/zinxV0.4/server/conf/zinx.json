@@ -1,0 +1,7 @@
+{
+    "Name":"ZinxV0.3 Server",
+    "Host":"0.0.0.0",
+    "TcpPort":8080,
+    "MaxConn":300,
+    "MaxPacketSize":4096
+}
