@@ -347,9 +347,9 @@ SSL采用会话恢复的方式来减少SSL握手过程中造成的巨大开销�
 
 ##### 2.5.2 会话恢复具体过程（ session ticket）：
 
-1. 如果客户端和服务器之间曾经建立了连接，服务器会在 new_session_ticket 数据中携带加密的 session_ticket 信息，客户端保存;
+1. 如果客户端和服务器之间曾经建立了连接，服务器会在 new_session_ticket 数据中携带加密（采用服务器的公钥进行加密，客户端不需要对其进行解密，只需保存即可）的 session_ticket 信息，客户端保存;
    如果客户端再次需要和该服务器建立连接，则在 client_hello 中扩展字段 session_ticket 中携带加密信息，一起发送给服务器;
-2. 服务器解密 sesssion_ticket 数据，如果能够解密失败，则按照正常的握手过程进行;
+2. 服务器解密（服务器使用自己的私钥进行解密） sesssion_ticket 数据，如果能够解密失败，则按照正常的握手过程进行;
 3. 如果解密成功，则返回 change_cipher_spec 与 encrypted_handshake_message 信息，两个信息作用与 session ID 中类似;
 4. 如果客户端能够验证通过服务器加密数据，则客户端同样发送 change_cipher_spec与encrypted_handshake_message 信息;
    服务器验证数据通过，则握手建立成功，开始进行正常的加密数据通信。
