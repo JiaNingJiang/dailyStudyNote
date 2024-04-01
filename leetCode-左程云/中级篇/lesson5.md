@@ -9,6 +9,62 @@
 2.再准备一个栈用来存当前栈中的最小值，方式是：每当数据栈push进一个元素时，最小值栈也要push进一个元素，这个元素需要是 min(当前push到数据栈的元素与最小值栈栈顶之间的最小值) ; 每当数据栈pop出一个元素时，最小值栈也要pop出一个元素。这样以来，利用最小值栈可以实现getMin的时间复杂度为O(1)
 ```
 
+```go
+package lesson5
+
+import "DataStructure2/utils"
+
+type SPStack struct {
+	common *utils.Stack // 用于push和pop的栈
+	min    *utils.Stack // 用于getMin的栈
+}
+
+func NewSPStack() *SPStack {
+	return &SPStack{
+		common: utils.NewStack(),
+		min:    utils.NewStack(),
+	}
+}
+
+func (ss *SPStack) Push(data int) *SPStack {
+	ss.common.Push(data)
+	minData := ss.min.Top()
+	if minData == nil {
+		ss.min.Push(data)
+		return ss
+	}
+
+	if data < minData.(int) {
+		ss.min.Push(data)
+	} else {
+		ss.min.Push(minData)
+	}
+	return ss
+}
+
+func (ss *SPStack) Pop() int {
+	data := ss.common.Pop()
+	ss.min.Pop()
+
+	if data != nil {
+		return data.(int)
+	} else {
+		return -1
+	}
+}
+
+func (ss *SPStack) BackMin() int {
+	min := ss.min.Top()
+	if min != nil {
+		return min.(int)
+	} else {
+		return -1
+	}
+}
+```
+
+
+
 ## 二、题目二
 
 1.如何仅用队列结构实现栈结构？
@@ -108,6 +164,86 @@
 ④重复步骤③的操作，继续求解。
 ```
 
+```go
+package lesson5
+
+import "math"
+
+func HoldWater(vessel []int) int {
+
+	leftMax := make([]int, len(vessel))
+	rightMax := make([]int, len(vessel))
+
+	max := math.MinInt
+	for i := 0; i < len(vessel); i++ {
+		if vessel[i] > max {
+			max = vessel[i]
+		}
+		leftMax[i] = max
+	}
+	max = math.MinInt
+	for i := len(vessel) - 1; i >= 0; i-- {
+		if vessel[i] > max {
+			max = vessel[i]
+		}
+		rightMax[i] = max
+	}
+
+	waterSet := make([]int, len(vessel))
+	totalWater := 0
+	for i := 1; i < len(vessel)-1; i++ { // 容器的左右两侧是无法存水的，因此跳过即可
+		water_i := getMin(leftMax[i], rightMax[i]) - vessel[i]
+		waterSet[i] = water_i
+		totalWater += water_i
+	}
+	return totalWater
+}
+
+func HoldWaterByPoint(vessel []int) int {
+	leftMax := vessel[0]
+	rightMax := vessel[len(vessel)-1]
+
+	leftIndex := 1                // 最左侧位置不能蓄水，因此跳过
+	rightIndex := len(vessel) - 2 // 最右侧位置不能蓄水，因此跳过
+
+	waterSet := make([]int, len(vessel))
+	totalWater := 0
+
+	for {
+		if leftIndex > rightIndex {
+			break
+		}
+
+		if vessel[leftIndex] > leftMax { // leftIndex位置比之前左侧所有位置都高，那么leftIndex位置无法存水
+			waterSet[leftIndex] = 0
+			leftMax = vessel[leftIndex]
+			leftIndex++ // 当前位置蓄水值已求出，因此可以继续leftIndex++求下一个为止
+		} else {
+			if leftMax <= rightMax { // leftIndex位置水位取决于leftMax
+				waterSet[leftIndex] = leftMax - vessel[leftIndex]
+				leftIndex++ // 当前位置蓄水值已求出，因此可以继续leftIndex++求下一个为止
+			}
+		}
+
+		if vessel[rightIndex] > rightMax {
+			waterSet[rightIndex] = 0
+			rightMax = vessel[rightIndex]
+			rightIndex-- // 当前位置蓄水值已求出，因此可以继续rightIndex--求下一个为止
+		} else {
+			if rightMax <= leftMax {
+				waterSet[rightIndex] = rightMax - vessel[rightIndex]
+				rightIndex-- // 当前位置蓄水值已求出，因此可以继续rightIndex--求下一个为止
+			}
+		}
+	}
+
+	for i := 0; i < len(waterSet); i++ {
+		totalWater += waterSet[i]
+	}
+	return totalWater
+}
+```
+
 
 
 ## 五、题目五
@@ -126,6 +262,27 @@
 因此，此题的求解只需要求两种情况：
 1.max-arr[N-1]  和  2.max-arr[0]   哪一个大就选那种划分情况
 
+```
+
+```go
+package lesson5
+
+import "math"
+
+func LeftAndRightMaxDiff(arr []int) int {
+	// 1.获取整个数组的最大值
+	max := math.MinInt
+	for i := 0; i < len(arr); i++ {
+		if arr[i] > max {
+			max = arr[i]
+		}
+	}
+
+	leftDiff := max - arr[len(arr)-1] // 将max划分到左侧区域
+	rightDiff := max - arr[0]         // 将max划分到右侧区域
+
+	return getMax(leftDiff, rightDiff)
+}
 ```
 
 
@@ -152,6 +309,30 @@ a = "2ab1" b="ab12" ,返回true
 
 原因：a = a + a , 修改后的a以任意点为起点长度为len(b)的子串都是原始a字符串的旋转词
 ```
+
+```go
+package lesson5
+
+import "DataStructure2/utils"
+
+// 判断两个字符串是否互为旋转词
+func RotationStr(str1, str2 string) bool {
+
+	if len(str1) != len(str2) {
+		return false
+	}
+
+	str1 += str1 // str1 = str1 + str1
+
+	if loc := utils.KMP(str1, str2, 0); loc != -1 {
+		return true
+	} else {
+		return false
+	}
+}
+```
+
+
 
 ## 七、题目七
 
@@ -209,6 +390,101 @@ func minTime(drinkedTime []int,a int,b int,index int,washLine int) int {
 }
 ```
 
+```go
+package lesson5
+
+import (
+	"DataStructure2/utils"
+)
+
+// 记录一台咖啡机的状态
+type Coffer struct {
+	Available int // 下一次可用的时间点
+	Consume   int // 用一次需要耗费的时间
+}
+
+func LessCoffer(a, b interface{}) bool {
+	aCoffer := a.(Coffer)
+	bCoffer := b.(Coffer)
+
+	aFinish := aCoffer.Consume + aCoffer.Available
+	bFinish := bCoffer.Consume + bCoffer.Available
+	if aFinish < bFinish {
+		return true
+	} else {
+		return false
+	}
+}
+
+// 记录喝咖啡问题的参数
+type CoffeePro struct {
+	Man              int   // 人数
+	CoffeeConsume    []int // 各台咖啡机冲咖啡需要的时间
+	WashConsume      int   // 洗一杯咖啡杯需要的时间
+	EvaporateConsume int   // 挥发需要的时间
+
+	DrinkSmallRoot []interface{} // 小根堆，用于计算完成Man人数喝咖啡问题的最早结束
+	DrinkedTime    []int         // 记录N个人喝完咖啡的时间点
+}
+
+func NewCoffeePro(man int, coffeeConsume []int, washConsume int, evaporateConsume int) *CoffeePro {
+	cfp := &CoffeePro{
+		Man:              man,
+		CoffeeConsume:    coffeeConsume,
+		WashConsume:      washConsume,
+		EvaporateConsume: evaporateConsume,
+		DrinkSmallRoot:   utils.NewHeap(make([]interface{}, 0, len(coffeeConsume)), false, LessCoffer),
+		DrinkedTime:      make([]int, 0, man),
+	}
+	// 将三个咖啡机的初始状态加入到小根堆中
+	for i := 0; i < len(coffeeConsume); i++ {
+		utils.HeapInsert(&cfp.DrinkSmallRoot, Coffer{0, coffeeConsume[i]}, false, LessCoffer)
+	}
+	return cfp
+}
+
+func (cfp *CoffeePro) MakeCoffee() {
+	// 1.从小根堆中取出一个节点相当于某人用咖啡机做了一杯咖啡
+	data := utils.PopAndheapify(&cfp.DrinkSmallRoot, false, LessCoffer)
+	coffer := data.(Coffer)
+	cfp.DrinkedTime = append(cfp.DrinkedTime, coffer.Consume+coffer.Available)
+
+	// 2.当前人喝完以后，咖啡杯可以供其他人继续使用
+	coffer.Available = coffer.Available + coffer.Consume
+	utils.HeapInsert(&cfp.DrinkSmallRoot, coffer, false, LessCoffer)
+}
+
+// 让所有人完成喝咖啡，得到完整的drinkTime数组
+func (cfp *CoffeePro) FinCoffeeDrink() {
+	for i := 0; i < cfp.Man; i++ {
+		cfp.MakeCoffee()
+	}
+}
+
+// 计算让所有杯子变干净的最早时间
+func (cfp *CoffeePro) MinTime() int {
+	return minTime(cfp.DrinkedTime, cfp.WashConsume, cfp.EvaporateConsume, 0, 0)
+}
+
+func minTime(drinkedTime []int, washConsume int, evaporateConsume int, index int, washLine int) int {
+	if index == len(drinkedTime)-1 {
+		return getMin(getMax(washLine, drinkedTime[index])+washConsume, drinkedTime[index]+evaporateConsume)
+	}
+
+	// 1.计算当前咖啡杯采用机器洗的方法最终结束的时间
+	wash := getMax(washLine, drinkedTime[index]) + washConsume
+	next1 := minTime(drinkedTime, washConsume, evaporateConsume, index+1, wash)
+	p1 := getMax(wash, next1)
+
+	// 2.计算当前咖啡杯采用自然蒸发的方法最终结束的时间
+	evaporate := drinkedTime[index] + evaporateConsume
+	next2 := minTime(drinkedTime, washConsume, evaporateConsume, index+1, washLine)
+	p2 := getMax(evaporate, next2)
+
+	return getMin(p1, p2)
+}
+```
+
 
 
 ## 八、题目八
@@ -227,5 +503,43 @@ func minTime(drinkedTime []int,a int,b int,index int,washLine int) int {
 b≠0，那么arr调整成 2222……4奇4奇4奇…… 的形式即可
 这种情况下： 若a >= 0，那么要求 c >= a  
 
+```
+
+```go
+package lesson5
+
+func AdjustArr(arr []int) bool {
+	twoCount := 0      // 累积数组中2的个数
+	oddCount := 0      // 累积数组中奇数的个数
+	fourTimeCount := 0 // 累积数组中4倍数的个数
+
+	for i := 0; i < len(arr); i++ {
+		if arr[i] == 2 {
+			twoCount++
+		} else if arr[i]%2 != 0 {
+			oddCount++
+		} else if arr[i]%4 == 0 {
+			fourTimeCount++
+		}
+	}
+
+	if twoCount == 0 { // 数组中没有2，则需要将数组调整为： 奇4奇4奇4…… 或者  4奇4奇4奇…… 的形式
+		if oddCount == 1 && fourTimeCount == 1 {
+			return true
+		}
+		if oddCount > 1 && fourTimeCount >= oddCount-1 { // 第一种情况是fourTimeCount >= oddCount-1；第二种情况是fourTimeCount >= oddCount。综合就是fourTimeCount >= oddCount-1
+			return true
+		}
+		return false
+	} else { // 数组中有2，则需要将数组调整为: 222……4奇4奇4奇…… 的形式
+		if oddCount == 1 && fourTimeCount == 1 {
+			return true
+		}
+		if oddCount > 1 && fourTimeCount >= oddCount {
+			return true
+		}
+		return false
+	}
+}
 ```
 

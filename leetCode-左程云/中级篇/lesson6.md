@@ -21,9 +21,82 @@ a = b = c = 1 , d = 0
 |F(N) F(N-1)| = |F(2) F(1)| * Factor^(N-2)   //因此求解斐波那契数列问题，就变成了求系数矩阵的N-2次幂的问题
 ```
 
+```go
+func selfMulMatrix(self interface{}, factor interface{}) interface{} {
 
+	if self == nil { // self总是一个2x2的矩阵（开始是一个单位矩阵(对角线为1，其余位置为0)）
+		selfMatrix := make([][]int, 2)
+		selfMatrix[0] = make([]int, 2)
+		selfMatrix[1] = make([]int, 2)
+		selfMatrix[0][0] = 1
+		selfMatrix[0][1] = 0
+		selfMatrix[1][0] = 0
+		selfMatrix[1][1] = 1
+		factorMatrix := factor.([][]int)
+		return utils.MatrixMultiply(selfMatrix, factorMatrix)
+	} else {
+		selfMatrix := self.([][]int)
+		factorMatrix := factor.([][]int)
+		return utils.MatrixMultiply(selfMatrix, factorMatrix)
+	}
+}
 
+func Fibonacci(n int64) int {
+	if n <= 2 {
+		if n == 0 {
+			return 0
+		} else if n == 1 {
+			return 1
+		} else if n == 2 {
+			return 1
+		} else {
+			panic("错误的输入")
+		}
+	}
+
+	factorMatrix := [][]int{{1, 1}, {1, 0}} // 系数矩阵
+
+	factorMatrixPow := EffectivePow(factorMatrix, n-2, selfMulMatrix) // 求系数矩阵的 n-2次幂
+
+	initial := [][]int{{1, 1}}
+	res := utils.MatrixMultiply(initial, factorMatrixPow.([][]int))
+
+	return res[0][0]
+}
+
+func MatrixMultiply(matrixA [][]int, matrixB [][]int) [][]int {
+	rowsA := len(matrixA)
+	colsA := len(matrixA[0])
+	rowsB := len(matrixB)
+	colsB := len(matrixB[0])
+
+	// 检查矩阵尺寸是否兼容
+	if colsA != rowsB {
+		return nil
+	}
+
+	// 创建结果矩阵
+	result := make([][]int, rowsA)
+	for i := range result {
+		result[i] = make([]int, colsB)
+	}
+
+	// 矩阵相乘
+	for i := 0; i < rowsA; i++ {
+		for j := 0; j < colsB; j++ {
+			for k := 0; k < colsA; k++ {
+				result[i][j] += matrixA[i][k] * matrixB[k][j]
+			}
+		}
+	}
+
+	return result
+}
 ```
+
+
+
+```go
 针对求解一个数的N次幂，可以用如下的方式：
 假设要求10^73 == ? 可以将73拆分为2的幂的组成形式：73 = 64 + 8 + 1 
 因此 10^73 = 10^64 * 10^8 * 10^1 
@@ -32,9 +105,33 @@ a = b = c = 1 , d = 0
 3) 重复，直到最大的 10^64
 
 通过上述的方式，求解一个数的N次幂，时间复杂度就只是 O(logN) 级别，远远优于O(N)
+
+func EffectivePow(x interface{}, y int64, selfMul func(interface{}, interface{}) interface{}) interface{} {
+	// 1.将y拆解为二进制形式
+	bitFormat := make([]byte, 0)
+	for i := 0; 1<<i <= y; i++ {
+		bitRes := ((1 << i) & y) >> i
+		if bitRes == 1 {
+			bitFormat = append(bitFormat, 1)
+		} else {
+			bitFormat = append(bitFormat, 0)
+		}
+	}
+	var powRes interface{}
+
+	for i := 0; i < len(bitFormat); i++ {
+		if bitFormat[i] == 1 {
+			powIndex := 1 << i
+			for j := 0; j < powIndex; j++ {
+				powRes = selfMul(powRes, x)
+			}
+		}
+	}
+
+	return powRes
+}
+
 ```
-
-
 
 ## 2.类推
 
@@ -139,6 +236,35 @@ F(N) = F(N-1) + F(N-3) - F(N-10)   // 减去10年前的奶牛数即可
 去掉的木棍：4 6 7 9 10 11 12 14 15 16 17
 ```
 
+```go
+package lesson6
+
+func BrokenTriangle(n int) int {
+	fibSet := make(map[int]struct{}, 0)
+
+	var fibCount int64 = 1
+	for {
+		curFib := Fibonacci(fibCount)
+		if curFib > n {
+			break
+		}
+
+		fibCount++
+		fibSet[curFib] = struct{}{}
+	}
+	remove := make([]int, 0, n)
+
+	for i := 1; i <= n; i++ {
+		if _, ok := fibSet[i]; !ok {
+			remove = append(remove, i)
+		}
+	}
+
+	return len(remove)
+}
+
+```
+
 
 
 ## 四、题目四
@@ -157,6 +283,83 @@ F(N) = F(N-1) + F(N-3) - F(N-10)   // 减去10年前的奶牛数即可
 1.初始条件 dp[n-1][weight] = 1 (weight <= w )  dp[n-1][weight] = 1 (weight > w )
 2. dp[i][j] = dp[i+1][j] + dp[i+1][j-v[i]] 
 
+```
+
+```go
+package lesson6
+
+// snacks: 记录各个零食的重量
+// bagSize: 背包的大小
+// 返回值: 可以的零食放法
+func BagSnack(snacks []int, bagSize int) int {
+	return bagSnack(snacks, bagSize, 0)
+}
+
+func bagSnack(snacks []int, remainBag, index int) int {
+	if index >= len(snacks) {
+		return -1
+	}
+	if remainBag == 0 {
+		return 1
+	}
+	if remainBag < 0 {
+		return -1
+	}
+
+	yao := bagSnack(snacks, remainBag-snacks[index], index+1)
+	buyao := bagSnack(snacks, remainBag, index+1)
+
+	if yao == -1 && buyao == -1 {
+		return -1
+	} else if yao == -1 {
+		return buyao
+	} else if buyao == -1 {
+		return yao
+	} else {
+		return yao + buyao
+	}
+}
+
+// snacks: 记录各个零食的重量
+// bagSize: 背包的大小
+// 返回值: 可以的零食放法
+func BagSnackDP(snacks []int, bagSize int) int {
+	return bagSnackDP(snacks, bagSize)
+}
+
+func bagSnackDP(snacks []int, bagSize int) int {
+
+	// 行表示背包内零食重量，从0~bagSize，共bagSize+1行
+	// 列表示当前遍历到零食下标，0~len(snacks)-1, 共len(snacks)列
+	// 初始已知：最后一行全1，因为零食重量 == bagSize，且零食数组没有越界
+	// 目标求解值: (0,0)
+	// 依赖关系： matrix[size][i] = matrix[size+snacks[i]][i+1] + matrix[size][i+1]
+
+	dp := make([][]int, bagSize+1)
+	for i := 0; i <= bagSize; i++ {
+		dp[i] = make([]int, len(snacks))
+	}
+
+	// 初始条件
+	for col := 0; col < len(snacks); col++ {
+		dp[bagSize][col] = 1
+	}
+
+	for row := bagSize - 1; row >= 0; row-- { // 从下往上(因为dp[i][j]依赖于下方)
+		for col := len(snacks) - 1; col >= 0; col-- { // 从右向左(因为dp[i][j]依赖于右方)
+			lowerRow := row + snacks[col]
+			rightCol := col + 1
+			if lowerRow <= bagSize && rightCol < len(snacks) { // size+snacks[i]和i+1都没有越界
+				dp[row][col] = dp[lowerRow][col+1] + dp[row][col+1]
+			} else if rightCol >= len(snacks) { //i+1都越界
+				dp[row][col] = 0
+			} else if lowerRow > bagSize && rightCol < len(snacks) { // 只有size+snacks[i]越界
+				dp[row][col] = dp[row][col+1]
+			}
+		}
+	}
+	return dp[0][0]
+}
 ```
 
 
@@ -178,6 +381,76 @@ F(N) = F(N-1) + F(N-3) - F(N-10)   // 减去10年前的奶牛数即可
 
 ```
 
+```go
+package lesson6
+
+import (
+	"sort"
+)
+
+type Job struct {
+	Ability int // 工作需要的能力
+	Salary  int // 工作提供的薪资
+}
+
+// 工作数组jobArr，个人能力数组capArr
+func AcAbilityGetWork(jobArr []Job, capArr []int) []int {
+	// 1.将工作数组按照工作难度从小到大排序
+	sort.Slice(jobArr, func(i, j int) bool {
+		if jobArr[i].Ability < jobArr[j].Ability {
+			return true
+		} else {
+			return false
+		}
+	})
+
+	filterArr := make([]Job, 0) // 只记录各工作难度下，薪资最高的工作
+	maxSalary := jobArr[0].Salary
+	curCap := jobArr[0].Ability
+	// 2.对于工作难度相等的工作，jobArr中只保留薪资最高的那一个
+	for i := 1; i < len(jobArr); i++ {
+		if jobArr[i].Ability == curCap { // 工作难度相等
+			if jobArr[i].Salary > maxSalary {
+				maxSalary = jobArr[i].Salary // 在相同的工作难度下，记录薪资最高的一个
+			} else {
+				if i == len(jobArr)-1 {
+					filterArr = append(filterArr, Job{Salary: maxSalary, Ability: curCap})
+				}
+			}
+		} else { // 只能是工作难度增大了，而不可能是变小了
+			filterArr = append(filterArr, Job{Salary: maxSalary, Ability: curCap}) // 记录上一个工作难度下的，薪资最高的工作
+			maxSalary = jobArr[i].Salary
+			curCap = jobArr[i].Ability
+		}
+	}
+
+	increaseJob := make([]Job, 0) // 工作如果难度上升，那么薪资也需要提高
+
+	increaseJob = append(increaseJob, filterArr[0])
+	lastJob := 0
+	for i := 1; i < len(filterArr); i++ {
+		if filterArr[i].Salary >= increaseJob[lastJob].Salary {
+			increaseJob = append(increaseJob, filterArr[i])
+			lastJob++
+		}
+	}
+
+	res := make([]int, 0)
+	for i := 0; i < len(capArr); i++ {
+		personCap := capArr[i]
+		salary := 0
+		for _, job := range increaseJob {
+			if personCap >= job.Ability {
+				salary = job.Salary
+			}
+		}
+		res = append(res, salary)
+	}
+
+	return res
+}
+```
+
 
 
 ## 六、题目六
@@ -189,28 +462,41 @@ F(N) = F(N-1) + F(N-3) - F(N-10)   // 减去10年前的奶牛数即可
 2.假设字符串为“-1023”，转换过程为:
 0 + (-1) = -1  (-1)*10 +(-0) = -10  -10*10+(-2) = -102   -102*10+(-3) = -1023
 
-func Convert(str string) int {
-    neg := str[0] == '-'?true:false
-    minq := math.MinInt/10
-    minr := math.MinInt%10
-    var res int = 0
-    var cur int = 0
-    var start int = 0
-    if neg {
-        start++
-    }
-    for i:=start;i<len(str);i++ {
-        cur = '0' - str[i]  // 获取负数
-        // 中途转化过程中，出现溢出(在下一轮的res*10会溢出或者在 +res 时会溢出)
-        if ( (res > minq) || (res == minq && cur > minr) ) {
-            panic("数值溢出，无法转换")
-        }
-        res = res*10+cur
-    }
-    if (!neg && res == math.MinInt) {   // 字符串为-math.MinInt，因为正整数比负整数少一个，因此转换会溢出
-        panic("数值溢出，无法转换")
-    }
-    return neg?res:-res
+package lesson6
+
+import "math"
+
+func Convert(numStr string) int {
+	var neg bool
+	if numStr[0] == '-' {
+		neg = true
+		numStr = numStr[1:]
+	} else {
+		neg = false
+	}
+
+	var res int // 最后转换得到的整数值（总是负数值）
+	// 为了防止转化后数值溢出，准备了下面两个变量
+	spillCheck := math.MinInt / 10
+	spillCheckRe := math.MinInt % 10
+
+	for i := 0; i < len(numStr); i++ {
+		eleInt := -int(numStr[i] - '0')
+		if res < spillCheck || res == spillCheck && eleInt < spillCheckRe {
+			panic("数值转换溢出")
+		}
+
+		res = res*10 + eleInt
+	}
+
+	if !neg && res == math.MinInt {
+		panic("数值转换溢出")
+	}
+	if neg {
+		return res
+	} else {
+		return -res
+	}
 }
 ```
 

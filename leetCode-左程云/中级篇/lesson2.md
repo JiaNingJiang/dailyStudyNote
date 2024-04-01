@@ -13,44 +13,59 @@
 3) 左子树2个节点，右子树0个节点
 即左子树有i(i = 0……N-1)个节点,右子树有N-i-1个节点 分别进行递归求解
 
-// 递归法
-func treeNum(n int) int {
-    if n == 0 {
-        return 0
-    }
-    if n == 1 {
-        return 1
-    }
-    if n == 2 {
-        return 2
-    }
-    count := 0
-    for left := 0;left <= n-1;left++ {
-        leftcount := treeNum(left)
-        rightcount := treeNum(n-1-left)
-        count = leftcount * rightcount
-    }
-    return count
+// 给你n个节点，返回可以组成的二叉树的个数
+func BinaryTreeCount(n int) int {
+	if n == 0 {
+		return 0
+	}
+	if n == 1 {
+		return 1
+	}
+	if n == 2 {
+		return 2
+	}
+	count := 0
+	for left := 0; left <= n-1; left++ { // 除了根节点外，实际可控制的节点个数为n-1个
+		right := n - 1 - left
+		leftCount := BinaryTreeCount(left)
+		rightCount := BinaryTreeCount(right)
+
+		if left == 0 {
+			count += rightCount
+		} else if right == 0 {
+			count += leftCount
+		} else if left != 0 && right != 0 {
+			count += leftCount * rightCount
+		}
+	}
+	return count
 }
 
-// 动态规划
-func treeNum(n int) int {
-    if n == 0 {
-        return 0
-    }
-    if n == 1 {
-        return 1
-    }
-    dp := make([]int,n+1)
-    dp[0] = 0
-    dp[1] = 1
-    
-    for i:= 2;i<= n;i++ {   // i表示本轮的总结点个数
-        for j:=0 ; j<= i-1 ; j++ {   // j表示本轮的左子树节点个数
-            dp[i] += dp[j] * dp[i-j-1]
-        } 
-    }
-    return dp[n]
+// 用动态规划实现
+func BinaryTreeCount2(n int) int {
+	dp := make([]int, n+1)
+	dp[0] = 0
+	dp[1] = 1
+	dp[2] = 2
+
+	if n <= 2 {
+		return dp[n]
+	}
+
+	for node := 3; node <= n; node++ { // 节点的个数
+		for left := 0; left <= node-1; left++ {
+			right := node - 1 - left
+			if left == 0 {
+				dp[node] += dp[right]
+			} else if right == 0 {
+				dp[node] += dp[left]
+			} else if left != 0 && right != 0 {
+				dp[node] += dp[left] * dp[right]
+			}
+		}
+	}
+
+	return dp[n]
 }
 ```
 
@@ -76,6 +91,27 @@ func treeNum(n int) int {
 准备两个变量：count和sum，count的意义不变。在遍历字符串过程中，一旦发现count < 0,那么让sum++(sum用来统计缺少的左括号个数)，然后让count重新归零，继续向下遍历。遍历完成后，count的值就是缺少的右括号的个数。count+sum就是总共缺少的括号个数。
 ```
 
+```go
+// 返回补全一个括号字符串到完整需要的最少括号数
+func CompleteParentheses(str string) int {
+	leftLack := 0
+	rightLack := 0
+
+	for i := 0; i < len(str); i++ {
+		if str[i] == '(' {
+			rightLack++
+		} else if str[i] == ')' {
+			rightLack--
+		}
+		if rightLack < 0 {
+			leftLack++
+			rightLack = 0
+		}
+	}
+	return leftLack + rightLack
+}
+```
+
 
 
 ## 三、题目三
@@ -92,6 +128,24 @@ func treeNum(n int) int {
 4.遍历到7的时候查看9是否存在
 5.遍历到3的时候查看5是否存在
 6.遍历到0的时候查看2是否存在
+```
+
+```go
+func NumberCouple(arr []int, dvalue int) {
+	vSet := make(map[int]struct{})
+
+	for _, v := range arr {
+		if _, ok := vSet[v]; !ok {
+			vSet[v] = struct{}{}
+		}
+	}
+
+	for firV, _ := range vSet {
+		if _, ok := vSet[firV+dvalue]; ok {
+			fmt.Printf("数字对(%d - %d)\n", firV, firV+dvalue)
+		}
+	}
+}
 ```
 
 
@@ -127,5 +181,198 @@ func treeNum(n int) int {
 对于符合上述两点的arr1中的数，我们每次取一个符合条件且最小的数移动到arr2。原因是这样可以最大程度拉大avg1和avg2的差距，增大arr1中可以实现magic操作的数据范围。	
 
 在实现时，还需要注意：平均值可能是小数，因此需要用两个浮点型存储avg1和avg2；arr1、arr2、avg1和avg2、hash每一轮都要重新生成。且arr1需要进行排序
+```
+
+```go
+func MagicTime(arr1, arr2 []int) int {
+	time := 0
+
+	for {
+		avg1 := average(arr1)
+		avg2 := average(arr2)
+
+		if avg1 == avg2 {
+			return time
+		}
+		smallMap := make(map[int]struct{})
+
+		if avg1 > avg2 { // 将arr1中 (avg2,avg1)范围内的数字移动到arr2中
+			if len(arr1) <= 1 { // arr1不能为空
+				return time
+			}
+			sort.Slice(arr1, func(i, j int) bool { // 对arr1进行排序
+				if arr1[i] >= arr1[j] {
+					return false
+				} else {
+					return true
+				}
+			})
+			for _, v := range arr2 { // smallMap存储具有较小平均值的数组所有元素
+				smallMap[v] = struct{}{}
+			}
+			res := 0
+			arr1, arr2, res = magicOperation(arr1, arr2, avg1, avg2, smallMap)
+			if res == 0 { // 找不到符合条件的数字可以移动
+				return time
+			} else {
+				time += res
+			}
+		} else { // 将arr2中 (avg1,avg2)范围内的数字移动到arr1中
+			if len(arr2) <= 1 { // arr2不能为空
+				return time
+			}
+			sort.Slice(arr2, func(i, j int) bool { // 对arr2进行排序
+				if arr2[i] >= arr2[j] {
+					return false
+				} else {
+					return true
+				}
+			})
+
+			for _, v := range arr1 { // smallMap存储具有较小平均值的数组所有元素
+				smallMap[v] = struct{}{}
+			}
+
+			res := 0
+			arr2, arr1, res = magicOperation(arr2, arr1, avg2, avg1, smallMap)
+			if res == 0 { // 找不到符合条件的数字可以移动
+				return time
+			} else {
+				time += res
+			}
+		}
+
+	}
+
+}
+
+func MagicTimeRecursion(arr1, arr2 []int) int {
+	avg1 := average(arr1)
+	avg2 := average(arr2)
+	smallMap := make(map[int]struct{})
+	if avg1 == avg2 {
+		return 0
+	} else if avg1 > avg2 {
+		if len(arr1) <= 1 {
+			return 0
+		}
+		sort.Slice(arr1, func(i, j int) bool { // 对arr1进行排序
+			if arr1[i] >= arr1[j] {
+				return false
+			} else {
+				return true
+			}
+		})
+
+		for _, v := range arr2 { // smallMap存储具有较小平均值的数组所有元素
+			smallMap[v] = struct{}{}
+		}
+		if count := magicTimeRecursion(arr1, arr2, avg1, avg2, smallMap); count == -1 {
+			return 0
+		} else {
+			return count
+		}
+	} else {
+		if len(arr2) <= 1 {
+			return 0
+		}
+		sort.Slice(arr2, func(i, j int) bool { // 对arr2进行排序
+			if arr2[i] >= arr2[j] {
+				return false
+			} else {
+				return true
+			}
+		})
+
+		for _, v := range arr1 { // smallMap存储具有较小平均值的数组所有元素
+			smallMap[v] = struct{}{}
+		}
+		if count := magicTimeRecursion(arr2, arr1, avg2, avg1, smallMap); count == -1 {
+			return 0
+		} else {
+			return count
+		}
+	}
+}
+
+func magicTimeRecursion(bigArr, smallArr []int, bigAvg, smallAvg float64, smallMap map[int]struct{}) int {
+	if bigAvg == smallAvg { // 需要结束
+		return -1
+	}
+	if len(bigArr) == 1 { // 需要结束
+		return -1
+	}
+
+	arr1, arr2, res := magicOperation(bigArr, smallArr, bigAvg, smallAvg, smallMap)
+	if res == 0 { // 无法转移，需要结束
+		return -1
+	}
+	avg1 := average(arr1)
+	avg2 := average(arr2)
+	newSmallMap := make(map[int]struct{})
+	if avg1 == avg2 { // 完成了一次，但是不能继续了
+		return 1
+	} else if avg1 > avg2 { // 可能还能继续，下一次从arr1中移动数字到arr2
+		sort.Slice(arr1, func(i, j int) bool { // 对arr1进行排序
+			if arr1[i] >= arr1[j] {
+				return false
+			} else {
+				return true
+			}
+		})
+		for _, v := range arr2 { // smallMap存储具有较小平均值的数组所有元素
+			newSmallMap[v] = struct{}{}
+		}
+		if res := magicTimeRecursion(arr1, arr2, avg1, avg2, newSmallMap); res == -1 {
+			return 1
+		} else {
+			return 1 + res
+		}
+
+	} else { // 可能还能继续，下一次从arr2中移动数字到arr1
+		sort.Slice(arr2, func(i, j int) bool { // 对arr2进行排序
+			if arr2[i] >= arr2[j] {
+				return false
+			} else {
+				return true
+			}
+		})
+		for _, v := range arr1 { // smallMap存储具有较小平均值的数组所有元素
+			newSmallMap[v] = struct{}{}
+		}
+		if res := magicTimeRecursion(arr2, arr1, avg2, avg1, newSmallMap); res == -1 {
+			return 1
+		} else {
+			return 1 + res
+		}
+	}
+}
+
+func magicOperation(bigArr, smallArr []int, bigAvg, smallAvg float64, smallMap map[int]struct{}) ([]int, []int, int) {
+
+	for i, v := range bigArr { // 从bigArr选出第一个符合条件的数(也是符合数中最小的一个)移动到smallArr
+		if _, ok := smallMap[v]; ok { // 如果bigArr中的这个数在smallArr中已经存在，则跳过
+			continue
+		}
+		if float64(v) > smallAvg && float64(v) <= bigAvg {
+			smallArr = append(smallArr, v)
+			bigArr = append(bigArr[:i], bigArr[i+1:]...)
+
+			smallMap[v] = struct{}{}
+			return bigArr, smallArr, 1
+		}
+	}
+	return bigArr, smallArr, 0
+}
+
+func average(arr []int) float64 {
+	sum := 0.0
+	for _, v := range arr {
+		sum += float64(v)
+	}
+	avg := sum / float64(len(arr))
+	value, _ := strconv.ParseFloat(fmt.Sprintf("%.3f", avg), 64)
+	return value
+}
 ```
 

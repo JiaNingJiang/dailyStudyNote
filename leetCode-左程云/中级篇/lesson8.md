@@ -7,32 +7,32 @@
 ```go
 // area是只包含`.`和`X`的字符串
 // 求解这个问题可以用贪心策略
-func minLight(area string) int {
-    index := 0 
-    light := 0
-    
-    for {
-        if index >= len(area) {
-            return light
-        }
-        // 障碍物格子不能放灯
-        if area[index] == "X" {
-            index++
-        } else {  // 此地为 `.`
-            light++  // `.`存在的区域必然有灯
-            if index + 1 == len(area) {  // 没有位置了，灯放置在index位置上
-                break
-            } else {  // 依旧还有格子未访问
-                if str[index+1] == "X" {  // 下一个位置是`X`
-                    index = index + 2  // 灯放置在index位置上。直接越过X，访问下一个格子即index+2
-                } else {  // 下一个位置是`.`
-                    index = index + 3 // 灯放在index+1位置上。越过该灯的影响范围，访问index+3
-                }
-            }
-        }
-        
-    }
+package lesson8
+
+func MinLight(area string) int {
+	index := 0
+	minLight := 0
+	for {
+		if index >= len(area) {
+			return minLight
+		}
+		if area[index] == 'x' { // 当前位置是路障,则直接跳过
+			index++
+		} else { // 当前位置是人行道
+			minLight++                // 该区域必然会有一个灯(具体位置可以是index或者是index+1，取决于下一个位置是否也是人行道)
+			if index+1 == len(area) { // 当前位置就是最后一块人行道，则路灯就安放在当前index位置
+				return minLight
+			}
+			if area[index+1] == 'x' { // 下一个位置是路障，则路灯就安放在当前index位置，然后跳到index+2位置
+				index += 2
+				continue
+			} else { // 下一位置还是人行道，则路灯安放在index+1位置，然后跳到index+3位置
+				index += 3
+			}
+		}
+	}
 }
+
 ```
 
 ## 二、题目二
@@ -89,6 +89,49 @@ func set(pre,in,post []int,prei,prej,ini,inj,posi,posj int) {
 }
 ```
 
+```go
+package lesson8
+
+// 根据二叉树的先序和中序序列获取后序序列
+func GetPostOrder(pre, in []int) []int {
+
+	length := len(pre)
+	post := make([]int, length)
+
+	getPostOrder(pre, in, &post, 0, length-1, 0, length-1, 0, length-1)
+
+	return post
+}
+
+func getPostOrder(pre, in []int, post *[]int, preS, preE, inS, inE, postS, postE int) {
+	if preS > preE { // 递归到最大深度，先序序列无法分得更小
+		return
+	}
+	if preS == preE { // 如果当前先序序列只剩一个节点，那么这个节点必然是子树的根节点
+		(*post)[postE] = pre[preS]
+		return
+	}
+	(*post)[postE] = pre[preS] // 后序序列最后一个节点和先序序列的第一个节点是一样的，都是二叉树的根节点
+
+	inRootIndex := inS // 找到根节点在中序序列中的位置
+	for ; inRootIndex <= inE; inRootIndex++ {
+		if in[inRootIndex] == pre[preS] {
+			break
+		}
+	}
+
+	leftArea := inRootIndex - inS // 左子树节点个数
+	// rightArea := inE - inRootIndex // 右子树节点个数
+
+	// 基于先序和中序设置后序的左子树区域
+	getPostOrder(pre, in, post, preS+1, preS+leftArea, inS, inRootIndex-1, postS, postS+leftArea-1)
+
+	// 基于先序和中序设置后序的右子树区域
+	getPostOrder(pre, in, post, preS+leftArea+1, preE, inRootIndex+1, inE, postS+leftArea, postE-1)
+
+}
+```
+
 优化策略：
 
 ```go
@@ -139,6 +182,59 @@ func mostLeftLevel(node *Node,level int) int {
 }
 
 // 时间复杂度是：O(（logN）^2) : 一共需要遍历 logN层，每一层要遍历最多logN个节点(每轮遍历的节点数-1)
+```
+
+```go
+package lesson8
+
+import (
+	"DataStructure2/utils"
+	"math"
+)
+
+// 返回一颗完全二叉树总的节点个数
+func TreeTotalNode(root *utils.Node) int {
+
+	leftDepth := getTreeDepth(root.Left)   // 获取左子树的深度
+	rightDepth := getTreeDepth(root.Right) // 获取右子树的深度
+
+	return treeTotalNode(root, leftDepth, rightDepth)
+}
+
+func treeTotalNode(root *utils.Node, leftDepth, rightDepth int) int {
+	if root.Left == nil && root.Right == nil {
+		return 1
+	}
+	if root.Left != nil && root.Right == nil {
+		return 2
+	}
+
+	if rightDepth == leftDepth { // 右子树深度 == 左子树深度，意味着左子树必然是满二叉树，但右子树不一定是
+		leftTotal := math.Pow(float64(2), float64(leftDepth)) - 1 + 1 // 左子树节点个数+根节点
+		// leftTotal + 右子树个数(递归求)
+		return int(leftTotal) + treeTotalNode(root.Right, getTreeDepth(root.Right.Left), getTreeDepth(root.Right.Right))
+	}
+	if rightDepth < leftDepth { // 右子树深度 < 左子树深度，意味着右子树必然是满二叉树，但左子树不一定是
+		rightTotal := math.Pow(float64(2), float64(rightDepth)) - 1 + 1 // 右子树节点个数+根节点
+		// rightTotal + 左子树个数(递归求)
+		return int(rightTotal) + treeTotalNode(root.Left, getTreeDepth(root.Left.Left), getTreeDepth(root.Left.Right))
+	}
+	panic("二叉树并非完全二叉树") // 右子树深度 > 左子树深度(不可能出现这种情况)
+}
+
+// 获取一颗二叉树的深度
+func getTreeDepth(root *utils.Node) int {
+	depth := 0
+
+	cur := root
+	for {
+		if cur == nil {
+			return depth
+		}
+		depth++
+		cur = cur.Left
+	}
+}
 ```
 
 
@@ -193,6 +289,35 @@ ends = [1 2 3 ……]， dp[4] = ends数组中3以及3左侧元素个数之和�
 因此总的时间复杂度就是 O(N*logN)
 ```
 
+```go
+package lesson8
+
+func LongestIncrease(order []int) int {
+	if len(order) == 0 {
+		return 0
+	}
+	dp := make([]int, len(order))
+
+	for i := 0; i < len(order); i++ {
+		// 1.在order[i]之前寻找比起更小的数
+		maxDP := 0 // 记录比order[i]更小数字的最大dp累计值
+		for j := 0; j < i; j++ {
+			if order[j] < order[i] {
+				maxDP = getMax(maxDP, dp[j])
+			}
+		}
+		// 2.当前i位置的dp值 == 1 + maxDP(可以是0)
+		dp[i] = 1 + maxDP
+	}
+	res := 0
+	for i := 0; i < len(dp); i++ {
+		res = getMax(res, dp[i])
+	}
+
+	return res
+}
+```
+
 
 
 ## 五、题目五
@@ -208,5 +333,67 @@ ends = [1 2 3 ……]， dp[4] = ends数组中3以及3左侧元素个数之和�
 ```go
 判断一个数能否被3整除，等价于一个数的每位之和能否被3整除。
 比如：判断12345678910是否能够整除3，等价于判断 (1+2+3+4+5+6+7+8+9+1+0) 能否整除3
+```
+
+```go
+package lesson8
+
+import (
+	"fmt"
+	"strconv"
+)
+
+// 生成一组神奇的数列
+func magicSeries(start, end int) []int {
+	series := make([]int, 0)
+	for i := start; i <= end; i++ {
+		str := ""
+		for j := 1; j <= i; j++ {
+			str += fmt.Sprintf("%d", j)
+		}
+		number, _ := strconv.Atoi(str)
+		series = append(series, number)
+	}
+	return series
+}
+
+func MagicSeriesDiv3(start, end int) int {
+	series := magicSeries(start, end)
+
+	count := 0
+
+	for _, num := range series {
+		if isNotDivBy3(num) {
+			fmt.Printf("%d可以被3整除\n", num)
+			count++
+		}
+	}
+
+	return count
+}
+
+// 判断一个数是否能被3整除
+func isNotDivBy3(num int) bool {
+
+	sum := 0
+	cur := num
+	for {
+		if cur/10 == 0 { // 只剩下一位
+			sum += cur
+			break
+		}
+		val := cur % 10 // 获得最低位
+		sum += val
+
+		cur = cur / 10 // 去掉最后一位
+	}
+
+	// 能否整除3
+	if sum%3 == 0 {
+		return true
+	} else {
+		return false
+	}
+}
 ```
 

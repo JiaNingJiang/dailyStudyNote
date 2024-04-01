@@ -38,29 +38,56 @@
 ```
 
 ```go
-func matchAbsence(arr []int) int {
-    if len(arr) == 0 {
-        return
-    }
-    for _,ele := range arr {  // 争做让 每一个 i位置放的数字是 i+1
-        modify(ele,arr)
-    }
-    for i:=0;i<len(arr);i++ {
-        if arr[i] != i+1 {
-            fmt.Println("缺少的数字为: ",i+1)
-        }
-    }
-}
+package lesson9
 
-func modify(value int,arr []int) {
-    for {
-        if arr[value-1] == value {
-            return
-        }
-        tmp := arr[value-1]
-        arr[value-1] = value
-        value = tmp
-    }
+import "math"
+
+func LookUpMissing(arr []int) []int {
+	n := len(arr) // 在arr数组中出现数字的最大可能值（最小可能值是1）
+
+	for i := 0; i < n; i++ { // 每轮交易都以从当前第i为开始，以重新回到第i位结束
+
+		if arr[i] == i+1 { // 直接不需要交换，结束本轮
+			continue
+		}
+
+		curVal := arr[i]
+		curIndex := i
+
+		// 需要交换，意味着需要从当前位置拿走一个数，导致该位置的空缺(只有每轮的第一次取是只取不填，因此导致空缺)
+		temp := arr[curVal-1]
+		arr[curVal-1] = curVal
+		curVal = temp // 通过交换而获得的值
+
+		arr[curIndex] = math.MinInt // 用来表示空缺
+		curIndex = curVal - 1       // 下一个需要检查的位置
+
+		for {
+
+			if arr[curIndex] == curVal { // 如果arr[curVal-1] == curVal,说明不需要进行交换了，那么本轮结束
+				break
+			}
+			// 此时 arr[curVal-1] != curVal ,那么令 arr[curVal-1] = curVal，并且把 arr[curVal-1] 原本的值拿到
+			temp1 := arr[curVal-1]
+			arr[curVal-1] = curVal
+			curVal = temp1
+
+			if curVal == math.MinInt { // 说明原本的位置是没有值的，刚好把一个值填了进去
+				break // 因为本来是空的，因此通过交换无法获取新值，因此结束本轮交换
+			}
+
+			curIndex = curVal - 1 // 下一个需要被交换的数组元素的下标是 curVal - 1
+
+		}
+	}
+
+	absenceSet := make([]int, 0)
+	for i := 0; i < n; i++ {
+		if arr[i] != i+1 {
+			absenceSet = append(absenceSet, i+1)
+		}
+	}
+	return absenceSet
 }
 ```
 
@@ -87,52 +114,60 @@ func modify(value int,arr []int) {
 1）人气数不能为负数，因为start、end以及三种人气变化方式的原因，当前的人气值必然只能是偶数，一旦为负数，那必然只能是先为-2，-2人气变回整数还需要额外的一次点赞。因此人气一旦为负数，那必然不是最优解
 2）人气值必然不可能超过 2*end，因为在最优解中使用私聊的方式只会发生在 end < cur < 2*end的情况下。
 
-// add,double,del 分别表示点赞、送礼、私聊会增加的人气值
-func  minCoin(add,double,del int,start,end int) int {
-    if start > end {
-        return -1
-    }
-    return process(0,end,add,double,del,start,end*2,( (end-start)/2 )*add)
+package lesson9
+
+import "math"
+
+// start,end 分别表示初始人气值和目标人气值
+// add 表示人气值+2 需要消耗的金币
+// twice 表示人气值*2 需要消耗的金币
+// del 表示人气值-2 需要消耗的金币
+func PopuValue(start, end int, add, twice, del int) int {
+	return popuValue(start, end, add, twice, del, 0, 0)
 }
 
-// preMoney表示已经花费的C币
-// cur表示当前的人气
-// limitAim表示人气达到什么程度就不需要再尝试了
-// limitCoin表示C币使用到什么程度就不需要再尝试了
-func process(preMoney,end int,add,double,del int,cur int,limitAim,limitCoin int) {
-    if preMoney > limitCoin {
-        return math.MaxInt
-    }
-    if cur < 0 {
-        return math.MaxInt
-    }
-    if cur > limitAim {
-         return math.MaxInt
-    }
-    if cur == end {
-        return preMoney
-    }
-    min := math.MinInt
-    
-    // 点赞，花费add币，人气+2
-    p1 := process(preMoney+add,end,add,double,del,cur+2,limitAim,limitCoin)
-    if p1 != math.MaxInt{
-        min = p1
-    }
-    
-     // 送礼，花费double币，人气*2
-    p2 := process(preMoney+double,end,add,double,del,cur*2,limitAim,limitCoin)
-    if p2 != math.MaxInt{
-        min = math.Min(min,p2)
-    }
-    
-     // 私聊，花费del币，人气-2
-    p3 := process(preMoney+del,end,add,double,del,cur-2,limitAim,limitCoin)
-    if p3 != math.MaxInt{
-        min = math.Min(min,p3)
-    }
-    
-    return min
+func popuValue(start, end int, add, twice, del int, curPopu int, curCoin int) int {
+	if curPopu == end { // 达到目标人气值
+		return curCoin
+	}
+	if curPopu >= 2*end { // 最优情况下，人气值不可能超过end的2倍
+		return -1
+	}
+	if curPopu < 0 { // 最优情况下，人气值不可能小于0
+		return -1
+	}
+
+	if curCoin > (end-start)/2*add { // 消耗的金币数比只凭点赞消耗的更多，就不可能是最优情况
+		return -1
+	}
+
+	addRes := popuValue(start, end, add, twice, del, curPopu+2, curCoin+add)
+	twiceRes := popuValue(start, end, add, twice, del, curPopu*2, curCoin+twice)
+	delRes := popuValue(start, end, add, twice, del, curPopu-2, curCoin+del)
+
+	// 只有当三种分区的结果都为-1的时候，返回值才会是-1
+	if addRes == -1 && twiceRes == -1 && delRes == -1 {
+		return -1
+	}
+
+	// 只要存在有分支！=-1的情况下，返回有效分支中消耗金币数最少的
+	addCoin := math.MaxInt
+	twiceCoin := math.MaxInt
+	delCoin := math.MaxInt
+
+	if addRes != -1 {
+		addCoin = addRes
+	}
+	if twiceRes != -1 {
+		twiceCoin = twiceRes
+	}
+	if delRes != -1 {
+		delCoin = delRes
+	}
+
+	res := getMin(getMin(addCoin, twiceCoin), delCoin)
+
+	return res
 }
 ```
 
@@ -161,6 +196,122 @@ CC直播的运营部门组织了很多运营活动，每个活动需要花费一
 最终就得到了各工作天数下能获得的最大报酬都是多少。
 ```
 
+```go
+package lesson9
+
+import "sort"
+
+// 每一条活动路线起点任意，但是终点必须是最后一个活动
+type ActRoute struct {
+	TotalConsume int // 活动路线总计消耗的天数
+	TotalSalary  int // 活动路线总计获得的报酬
+}
+
+type Activity struct {
+	Consume  int         // 参加活动消耗的天数
+	Salary   int         // 参加活动获得的报酬
+	NextSet  []*Activity // 保存当前活动的下一个可以的活动
+	LastSet  []*Activity // 用于追溯当前活动的上一个可以的活动
+	OrderSet []*ActRoute // 活动路线的有序表(按照消耗天数从小到大有序，且天数与报酬需要成正比)
+}
+
+// 构建一个新活动
+func NewActivity(consume, salary int, next, last []*Activity) *Activity {
+	return &Activity{
+		Consume:  consume,
+		Salary:   salary,
+		NextSet:  next,
+		LastSet:  last,
+		OrderSet: make([]*ActRoute, 0),
+	}
+}
+
+func (act *Activity) AddNext(next *Activity) {
+	act.NextSet = append(act.NextSet, next)
+}
+
+func (act *Activity) AddLast(next *Activity) {
+	act.LastSet = append(act.LastSet, next)
+}
+
+// 整理指定节点为起点的活动路线
+func (act *Activity) OrderActRoute() {
+
+	if len(act.NextSet) == 0 {
+		newRoute := &ActRoute{TotalConsume: act.Consume, TotalSalary: act.Salary}
+		act.OrderSet = append(act.OrderSet, newRoute)
+		return
+	}
+
+	for _, nextAct := range act.NextSet { // 遍历当前活动所有的后续活动
+		for _, actRoute := range nextAct.OrderSet { // 遍历每一个后续活动的有序活动路线
+			newRoute := &ActRoute{TotalConsume: act.Consume + actRoute.TotalConsume,
+				TotalSalary: act.Salary + actRoute.TotalSalary}
+			act.OrderSet = append(act.OrderSet, newRoute)
+		}
+	}
+
+	// 将所有活动路线按照消耗天数进行排序
+	sort.Slice(act.OrderSet, func(i, j int) bool {
+		if act.OrderSet[i].TotalConsume < act.OrderSet[j].TotalConsume {
+			return true
+		} else {
+			return false
+		}
+	})
+
+	if len(act.OrderSet) == 1 {
+		return
+	}
+
+	// 排除掉所有天数增多，但报酬不递增的活动路线
+	targetRoutes := make([]*ActRoute, 0)
+	index := 0
+	for i := 0; i < len(act.OrderSet); i++ {
+		if len(targetRoutes) == 0 {
+			targetRoutes = append(targetRoutes, act.OrderSet[0])
+			continue
+		}
+		if act.OrderSet[i].TotalSalary > targetRoutes[index].TotalSalary {
+			targetRoutes = append(targetRoutes, act.OrderSet[i])
+			index++
+		}
+	}
+}
+
+func SumPerfectRoutes(starts []*Activity) []*ActRoute {
+	allActRoutes := make([]*ActRoute, 0)
+	for _, start := range starts { // 遍历每一个活动
+		for i := 0; i < len(start.OrderSet); i++ { // 遍历每一个活动的有效活动路线
+			allActRoutes = append(allActRoutes, start.OrderSet...)
+		}
+	}
+
+	sort.Slice(allActRoutes, func(i, j int) bool {
+		if allActRoutes[i].TotalConsume < allActRoutes[j].TotalConsume {
+			return true
+		} else {
+			return false
+		}
+	})
+
+	targetRoutes := make([]*ActRoute, 0)
+	index := 0
+	for i := 0; i < len(allActRoutes); i++ {
+		if len(targetRoutes) == 0 {
+			targetRoutes = append(targetRoutes, allActRoutes[0])
+			continue
+		}
+		if allActRoutes[i].TotalSalary > targetRoutes[index].TotalSalary {
+			targetRoutes = append(targetRoutes, allActRoutes[i])
+			index++
+		}
+	}
+
+	return targetRoutes
+}
+```
+
 ## 四、题目四
 
 给定一个只由 0（假）、1（真）、&（逻辑与）、|（逻辑或）、和^（异或）五种字符组成的字符串express，再给定一个布尔值desired。返回express能有多少种组合的方式，可以达到desired的结果？
@@ -180,68 +331,74 @@ CC直播的运营部门组织了很多运营活动，每个活动需要花费一
 2.外循环每次都访问奇数下标位置(也就是位运算符)，i从1开始，i每轮后+2
 3.外循环访问到位运算符后，根据desired是true还是false分为不同的分支，需要通过递归的方式分别获取位运算符左右返回指定bool值的数量
 
-func num(exp string,desired bool) int {
-    if exp == "" {
-        return 0
-    }
-    if (!isValid(exp)) {  // 如果字符串无效则返回
-        return 0
-    }
-    return p(exp,desired,0,len(exp)-1)
+func LogicalOpt(logicStr string, desire bool) int {
+	if logicStr == "" {
+		return 0
+	}
+	if !isValid(logicStr) {
+		return 0
+	}
+
+	return logicalOpt(logicStr, desire, 0, len(logicStr)-1)
+
 }
 
-// 在exp[L……R]上运算，返回期待为desired的方法数
-func p(exp string,desired bool,L,R int) int {
-    // 边界条件
-    if L == R {   // 区域只有一个数，只能为0或1
-        if exp[L] == "1" {
-            if desired {   // 1本身正好就是true，因此方法数为1
-                return 1
-            } else {  
-                return 0
-            }
-        } else {   // 为0
-            if desired {   
-                return 0
-            } else {   // 0本身正好就是false，因此方法数为1
-                return 1
-            }
-        }
-    }
-    res := 0
-    if desired {  // 期待为true
-        // i位置尝试L……R范围上的每一个逻辑符号
-        for i:=L+1;i<R;i+=2 {
-            switch exp[i] {
-                case "&":
-                // 左右计算结果必须都为true
-                res += p(exp,true,L,i-1)*p(exp,true,i+1,R)
-                case "|":
-                res += p(exp,true,L,i-1)*p(exp,true,i+1,R)
-                res += p(exp,true,L,i-1)*p(exp,false,i+1,R)
-                res += p(exp,false,L,i-1)*p(exp,true,i+1,R)
-                case "^":
-                res += p(exp,true,L,i-1)*p(exp,false,i+1,R)
-                res += p(exp,false,L,i-1)*p(exp,true,i+1,R)
-            }
-        }
-    } else { // 期待为false
-        for i:=L+1;i<R;i+=2 {
-            switch exp[i] {
-                case "&":
-                // 有一个false即可
-                res += p(exp,false,L,i-1)*p(exp,false,i+1,R)
-                res += p(exp,true,L,i-1)*p(exp,false,i+1,R)
-                res += p(exp,false,L,i-1)*p(exp,true,i+1,R)
-                case "|":  // 都为false
-                res += p(exp,false,L,i-1)*p(exp,false,i+1,R)
-                case "^":
-                res += p(exp,true,L,i-1)*p(exp,true,i+1,R)
-                res += p(exp,false,L,i-1)*p(exp,false,i+1,R)
-            }
-        }
-    }
-    return res
+func logicalOpt(logicStr string, desire bool, left, right int) int {
+	// 边界条件
+	if left > right {
+		return 0
+	}
+
+	if left == right { // 此时只剩一个字符
+		if desire { // 目标渴望是true
+			if logicStr[left] == '1' {
+				return 1
+			} else if logicStr[left] == '0' {
+				return 0
+			}
+		} else { // 目标渴望是false
+			if logicStr[left] == '1' {
+				return 0
+			} else if logicStr[left] == '0' {
+				return 1
+			}
+		}
+	}
+
+	// 正常递归
+	res := 0 // 可能的结果数
+
+	if desire { // 目标渴望是true
+		for i := left + 1; i < right; i += 2 { // 遍历每一个逻辑运算符(注意：这里每次只需要遍历当前区域内(left~right)的奇数位置)
+			op := logicStr[i]
+			switch op {
+			case '&': // 左右必须都是true
+				res += logicalOpt(logicStr, true, left, i-1) * logicalOpt(logicStr, true, i+1, right)
+			case '|': // 左右有一个是true即可
+				res += logicalOpt(logicStr, true, left, i-1) * logicalOpt(logicStr, true, i+1, right)
+				res += logicalOpt(logicStr, true, left, i-1) * logicalOpt(logicStr, false, i+1, right)
+				res += logicalOpt(logicStr, false, left, i-1) * logicalOpt(logicStr, true, i+1, right)
+			case '^': // 左右必须相异
+				res += logicalOpt(logicStr, true, left, i-1) * logicalOpt(logicStr, false, i+1, right)
+				res += logicalOpt(logicStr, false, left, i-1) * logicalOpt(logicStr, true, i+1, right)
+			}
+		}
+	} else { // 目标渴望是false
+		for i := left + 1; i < right; i += 2 { // 遍历每一个逻辑运算符
+			switch logicStr[i] {
+			case '&': // 左右有一个是false即可
+				res += logicalOpt(logicStr, false, left, i-1) * logicalOpt(logicStr, false, i+1, right)
+				res += logicalOpt(logicStr, true, left, i-1) * logicalOpt(logicStr, false, i+1, right)
+				res += logicalOpt(logicStr, false, left, i-1) * logicalOpt(logicStr, true, i+1, right)
+			case '|': // 左右必须都是false
+				res += logicalOpt(logicStr, false, left, i-1) * logicalOpt(logicStr, false, i+1, right)
+			case '^': // 左右必须相同
+				res += logicalOpt(logicStr, true, left, i-1) * logicalOpt(logicStr, true, i+1, right)
+				res += logicalOpt(logicStr, false, left, i-1) * logicalOpt(logicStr, false, i+1, right)
+			}
+		}
+	}
+	return res
 }
 ```
 
@@ -254,50 +411,104 @@ func p(exp string,desired bool,L,R int) int {
 4.对角线区域，意味着 L == R , 因此对角线区域就是初始条件可以获得的
 5.因为最后一行只有一个位置需要求解，也就是对角线，而对角线已知，因此求解的顺序是从下往上，从左往右。
 
-func dpLive(exp string,desired bool) int {
-    N := len(str)
-    tMap := new int[N][N]
-    fMap := new int[N][N]
-    // 获取对角线
-    for i:=0;i<N;i+=2 {
-        tMap[i][i] = str[i] == "1"?1:0
-        fMap[i][i] = str[i] == "0"?1:0
-    }
-    // 1.选择一个起点和终点，起点和终点都必须是数字
-    // 行需要隔行求，N-1 行是数字，row每次-2，这样每次访问的才都是数字
-    for row := N-3;row >= 0;row-=2 {   // row表示左边界(必须是数字)
-        for col:=row+2 ; col < N ; col+=2 { //col表示右边界(必须是数字)
-            for i:=row+1; i<col;i+=2 {  // i每次都访问指定起点到终点范围内的所有关系运算符
-                // 1.计算tMap
-                switch exp[i] {
-                    case "&":
-                    // exp[i]左右两侧计算结果必须都为true
-                    tMap[row][col] += tMap[row][i-1]*tMap[i+1][col]   
-                    case "|":
-                    tMap[row][col] += tMap[row][i-1]*fMap[i+1][col]
-                    tMap[row][col] += fMap[row][i-1]*tMap[i+1][col]
-                    tMap[row][col] += fMap[row][i-1]*fMap[i+1][col]
-                    case "^":
-                    tMap[row][col] += tMap[row][i-1]*fMap[i+1][col]
-                    tMap[row][col] += fMap[row][i-1]*tMap[i+1][col]
-            	}
-                // 2.计算fMap
-                switch exp[i] {
-                    case "&":  // 有一个false即可
-                    fMap[row][col] += tMap[row][i-1]*fMap[i+1][col]
-                    fMap[row][col] += fMap[row][i-1]*tMap[i+1][col]
-                    fMap[row][col] += fMap[row][i-1]*fMap[i+1][col]
-                    case "|":  // 都为false
-                    fMap[row][col] += fMap[row][i-1]*fMap[i+1][col]
-                    case "^":
-                    fMap[row][col] += tMap[row][i-1]*fMap[i+1][col]
-                    fMap[row][col] += fMap[row][i-1]*tMap[i+1][col]
-            	}
-            }
-        }
-    }
-    // 求解的目标，左边界为0，右边界为N-1
-    return desired ? tMap[0][N-1]:fMap[0][N-1]   
+func LogicalOptDP(logicStr string, desire bool) int {
+	if logicStr == "" {
+		return 0
+	}
+	if !isValid(logicStr) {
+		return 0
+	}
+
+	return logicalOptDP(logicStr, desire)
+
+}
+
+func logicalOptDP(logicStr string, desire bool) int {
+	N := len(logicStr)
+
+	trueDP := make([][]int, N)
+	for i := 0; i < N; i++ {
+		trueDP[i] = make([]int, N)
+	}
+
+	falseDP := make([][]int, N)
+	for i := 0; i < N; i++ {
+		falseDP[i] = make([]int, N)
+	}
+
+	// 1.设置初始条件(矩阵对角线) -- 两个矩阵(一个是最终返回结果是true，一个是最终返回结果为false)
+	for i := 0; i < N; i += 2 { // 每次都要访问数字(left和right都在偶数位置上)
+		if logicStr[i] == '0' {
+			trueDP[i][i] = 0
+			falseDP[i][i] = 1
+		} else if logicStr[i] == '1' {
+			trueDP[i][i] = 1
+			falseDP[i][i] = 0
+		}
+	}
+
+	// 2.根据初始条件获取其他位置(从下往上，从左向右求解)
+	for left := N - 3; left >= 0; left -= 2 { // 范围的左边界(需要是数字)  N-1作为对角线是初始条件不用求
+		for right := left + 2; right < N; right += 2 { // 范围的右边界(需要是数字)
+			for oper := left + 1; oper < right; oper += 2 { // 遍历从左边界到右边界范围内的所有逻辑运算符
+				// 2.1 计算trueDP
+				switch logicStr[oper] {
+				case '&': // logicStr[oper] 左右两侧都必须是true
+					trueDP[left][right] += trueDP[left][oper-1] * trueDP[oper+1][right]
+				case '|':
+					trueDP[left][right] += trueDP[left][oper-1] * trueDP[oper+1][right]
+					trueDP[left][right] += trueDP[left][oper-1] * falseDP[oper+1][right]
+					trueDP[left][right] += falseDP[left][oper-1] * trueDP[oper+1][right]
+				case '^':
+					trueDP[left][right] += trueDP[left][oper-1] * falseDP[oper+1][right]
+					trueDP[left][right] += falseDP[left][oper-1] * trueDP[oper+1][right]
+				}
+				// 2.2 计算falseDP
+				switch logicStr[oper] {
+				case '&':
+					falseDP[left][right] += falseDP[left][oper-1] * falseDP[oper+1][right]
+					falseDP[left][right] += trueDP[left][oper-1] * falseDP[oper+1][right]
+					falseDP[left][right] += falseDP[left][oper-1] * trueDP[oper+1][right]
+				case '|':
+					falseDP[left][right] += falseDP[left][oper-1] * falseDP[oper+1][right]
+				case '^':
+					falseDP[left][right] += trueDP[left][oper-1] * trueDP[oper+1][right]
+					falseDP[left][right] += falseDP[left][oper-1] * falseDP[oper+1][right]
+				}
+			}
+		}
+	}
+
+	// 3.返回结果(左边界为0，右边界为N-1的矩阵元素即是要求解的目标)
+	if desire {
+		return trueDP[0][N-1]
+	} else {
+		return falseDP[0][N-1]
+	}
+
+}
+
+// 判断一个逻辑字符串是否有效
+func isValid(logicStr string) bool {
+	length := len(logicStr)
+
+	if length%2 == 0 { // 字符串必须是奇数长度
+		return false
+	}
+
+	for i := 0; i < length; i += 2 { // 偶数位置必须是0或1
+		if logicStr[i] != '0' && logicStr[i] != '1' {
+			return false
+		}
+	}
+
+	for i := 1; i < length; i += 2 { // 奇数位置必须是逻辑运算符 & | ^
+		if logicStr[i] != '&' && logicStr[i] != '|' && logicStr[i] != '^' {
+			return false
+		}
+	}
+
+	return true
 }
 ```
 
@@ -322,30 +533,37 @@ func dpLive(exp string,desired bool) int {
 
 以arr[i]结尾的不重复子串的左边界取自上述两种情况中，距离arr[i]最近的那一个
 
-func maxUnique(str string) int {
-    if str == "" {
-        return 0
-    }
-    charSet := toCharArray(str)  // string变成byte切片
-    recentAppear := make(map[int]int) // 存储每一种字符最近在字符串中出现的位置
-    for i:=0;i<256;i++ {  // 假设字符的编码是 0~255
-        map[i] = -1
-    }
-    len := 0
-    pre := -1   // 用来存储以上一位(i-1位)作为结尾的最长不重复子串的左边界
-    cur := 0
-    
-    for i:=0;i<len(charSet);i++ {
-        pre = math.Max(pre,recentAppear[charSet[i]])  // 最大的 == 距离str[i]最近的
-        cur = i - pre  // 当前以str[i]结尾的不重复子串的长度
-        recentAppear[charSet[i]] = i  // 更新字符str[i]最近出现的位置
-        
-        len = math.Max(len,cur)   // 更新最长不重复子串的长度
-    }
-    
-    return len
-}
+package lesson9
 
+import "math"
+
+func MaxUnique(str string) int {
+	if str == "" {
+		return 0
+	}
+
+	recentCharMap := make(map[uint8]int) // 用于记录不同字符出现在字符串中的距离结尾最近的位置
+
+	for i := 0; i <= 255; i++ {
+		recentCharMap[uint8(i)] = -1
+	}
+
+	maxLen := math.MinInt
+	lastLeft := -1 // i-1 位置的无重复子串的左边界位置
+	index := 0     // 访问下标i
+
+	for {
+		if index >= len(str) {
+			return maxLen
+		}
+		lastLeft = getMax(lastLeft, recentCharMap[str[index]]) // 当前以index结尾的无重复字符串的左边界
+		recentCharMap[str[index]] = index
+		curLen := index - lastLeft
+		maxLen = getMax(maxLen, curLen)
+		index++
+	}
+
+}
 ```
 
 ## 六、题目六
@@ -401,6 +619,55 @@ str1中以str1[i]结尾的子串完全转化为str2中以str2[j]结尾的子串�
 每一个dp[i][j] 所需要的代价是上述4种代价中最小的那一个。
 ```
 
+```go
+package lesson9
+
+import "math"
+
+// 将str1编辑成str2，消耗的最小代价
+func StrEditDistance(str1, str2 string, icost, dcost, rcost int) int {
+	rowCount := len(str1) + 1
+	colCount := len(str2) + 1
+
+	dp := make([][]int, rowCount)
+	for i := 0; i < rowCount; i++ {
+		dp[i] = make([]int, colCount)
+	}
+
+	// 1.初始条件（第一行和第一列是已知的）
+	for col := 0; col < colCount; col++ {
+		dp[0][col] = col * icost // 第一行，str1为空，str1变成str2只能插入
+	}
+	for row := 1; row < rowCount; row++ {
+		dp[row][0] = row * dcost // 第一行，str2为空，str1变成str2只能删除
+	}
+
+	// 2.普通dp求解
+	for row := 1; row < rowCount; row++ {
+		for col := 1; col < colCount; col++ {
+			cost := math.MaxInt
+			// 2.1 结尾字符相等的情况，依赖于左上角的dp[row-1][col-1]
+			if str1[row-1] == str2[col-1] { // 注意：字符串索引下标要比矩阵中的行与列小1(因为矩阵引入了0长度字符串概念)
+				cost = getMin(cost, dp[row-1][col-1])
+			}
+			// 2.2 将str1[0……i-1]变成str2[0……j]，然后将str1[i]删除
+			cost = getMin(cost, dp[row-1][col]+dcost)
+
+			// 2.3 将str1[0……i]变成str2[0……j-1]，然后在str1[i]之后新加一个str2[j]
+			cost = getMin(cost, dp[row][col-1]+icost)
+
+			// 2.4 将str1[0……i-1]变成str2[0……j-1]，然后将str1[i]变成str2[j]
+			cost = getMin(cost, dp[row-1][col-1]+rcost)
+
+			dp[row][col] = cost
+		}
+	}
+
+	// 3.返回结果
+	return dp[rowCount-1][colCount-1]
+}
+```
+
 ## 七、题目七
 
 给定一个全是小写字母的字符串str，删除多余字符，使得每种字符只保留一个，并让最终结果字符串的字典序最小。
@@ -420,3 +687,55 @@ str = "dbcacbca"，删除第一个'b'、第一个'c'、第二个'c'、第二个'
 5.结束条件：直到字符串长度为1（将这个字符加入到res中）
 ```
 
+```go
+package lesson9
+
+func Operation(str string) string {
+	if str == "" {
+		return ""
+	}
+	freqMap := make(map[uint8]int)
+	for i := 0; i < len(str); i++ {
+		freqMap[str[i]]++
+	}
+	minACSIndex := 0
+	resSubStr := ""
+	curStr := str
+	for {
+		if len(curStr) == 1 {
+			resSubStr += curStr
+			return resSubStr
+		}
+		for i := 0; i < len(curStr); i++ {
+			freqMap[curStr[i]]--
+			if freqMap[curStr[i]] == 0 {
+				// 1.计算在出现词频为0时，之前字符串中具有最小ascii码的下标
+				minAscii := uint8(255)
+				for index := 0; index <= i; index++ {
+					if curStr[index] < minAscii {
+						minAscii = curStr[index]
+						minACSIndex = index
+					}
+				}
+				// 2.字符追加
+				resSubStr += string(curStr[minACSIndex])
+				// 3.冗余字符删除
+				newCurStr := curStr[minACSIndex+1:]   // 删除掉包含minACSIndex在内的之前的所有字符
+				for j := 0; j < len(newCurStr); j++ { // 删除从 minACSIndex+1开始到末尾的所有 curStr[minACSIndex]字符
+					if newCurStr[j] == curStr[minACSIndex] {
+						newCurStr = newCurStr[:j] + newCurStr[j+1:]
+					}
+				}
+				curStr = newCurStr
+				break
+			}
+		}
+		// 重新组件词频表
+		freqMap = make(map[uint8]int)
+		for i := 0; i < len(curStr); i++ {
+			freqMap[curStr[i]]++
+		}
+	}
+
+}
+```
