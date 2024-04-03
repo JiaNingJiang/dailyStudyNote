@@ -20,6 +20,74 @@
 通过上述的方法，计算出每一台洗衣机需要的最少轮次。接着从获得的[]wait数组中获取最大的wait
 ```
 
+```go
+func WashMachine(washer []int) int {
+	totalCloth := 0
+	for _, laundry := range washer {
+		totalCloth += laundry
+	}
+	washerCount := len(washer)
+	avgCloth := totalCloth / washerCount // 平均每台洗衣机要洗的衣物
+
+	roundSet := make([]int, washerCount) // 以每台洗衣机为中心，达成待洗衣物的均分需要的轮次各自是多少
+
+	for i := 0; i < washerCount; i++ {
+		leftLaundry := 0 // 左侧已有的待洗衣物
+		for left := 0; left < i; left++ {
+			leftLaundry += washer[left]
+		}
+		rightLaundry := 0 // 右侧已有的待洗衣物
+		for right := i + 1; right < washerCount; right++ {
+			rightLaundry += washer[right]
+		}
+		leftAdjust := leftLaundry - avgCloth*i                   // 左侧需要调整的待洗衣物数量
+		rightAdjust := rightLaundry - avgCloth*(washerCount-1-i) // 右侧需要调整的待洗衣物数量
+
+		if leftAdjust < 0 && rightAdjust < 0 { // 左右都需要移入待洗衣物
+			roundSet[i] = abs(leftAdjust) + abs(rightAdjust)
+		} else if leftAdjust > 0 && rightAdjust > 0 { // 左右都需要移入待洗衣物
+			roundSet[i] = getMax(leftAdjust, rightAdjust)
+		} else if leftAdjust > 0 && rightAdjust < 0 {
+			roundSet[i] = getMax(leftAdjust, abs(rightAdjust))
+		} else if leftAdjust < 0 && rightAdjust > 0 {
+			roundSet[i] = getMax(abs(leftAdjust), rightAdjust)
+		} else if leftAdjust == 0 && rightAdjust == 0 {
+			roundSet[i] = 0
+		} else if leftAdjust == 0 && rightAdjust != 0 {
+			roundSet[i] = abs(rightAdjust)
+		} else if leftAdjust != 0 && rightAdjust == 0 {
+			roundSet[i] = abs(leftAdjust)
+		}
+	}
+
+	minRound := math.MaxInt
+	for _, round := range roundSet {
+		if round < minRound {
+			minRound = round
+		}
+	}
+	return minRound
+}
+
+func abs(before int) int {
+	if before < 0 {
+		return -before
+	} else {
+		return before
+	}
+}
+
+func getMax(num1, num2 int) int {
+	if num1 > num2 {
+		return num1
+	} else {
+		return num2
+	}
+}
+```
+
+
+
 ## 二、题目二
 
 用螺旋的方式打印矩阵，比如下面的矩阵
@@ -48,6 +116,64 @@
 2.当 b == d，也就是左上角和右下角在 同一列 ，此时从上到下打印完成后退出
 3.当 a > c,也就是左上角在右下角 下方 时，退出
 4.当 b > d,也就是左上角在右下角 右侧 时，退出
+```
+
+```go
+package lesson4
+
+import "fmt"
+
+func SpiralPrint(matrix [][]int) {
+	maxRow := len(matrix) - 1
+	maxCol := len(matrix[0]) - 1
+
+	luRow := 0      // 左上角的行号
+	luCol := 0      // 左上角的列号
+	rlRow := maxRow // 右下角的行号
+	rlCol := maxCol // 右下角的列号
+
+	defer fmt.Println()
+	for {
+		if luRow == rlRow { // 左上角与右下角在同一行
+			for col := luCol; col <= rlCol; col++ { // 打印完这一行后退出
+				fmt.Printf(" %d ", matrix[luRow][col])
+			}
+			return
+		}
+		if luCol == rlCol { // 左上角与右下角在同一列
+			for row := luRow; row <= rlRow; row++ { // 打印完这一列后退出
+				fmt.Printf(" %d ", matrix[row][luCol])
+			}
+			return
+		}
+		if luRow > rlRow || luCol > rlCol { // 左上角在右下角的下方或者右侧时，退出
+			return
+		}
+
+		// 1.打印矩阵顶层行
+		for col := luCol; col < rlCol; col++ {
+			fmt.Printf(" %d ", matrix[luRow][col])
+		}
+		// 2.打印矩阵的最右列
+		for row := luRow; row < rlRow; row++ {
+			fmt.Printf(" %d ", matrix[row][rlCol])
+		}
+		// 3.打印矩阵的最底层
+		for col := rlCol; col > luCol; col-- {
+			fmt.Printf(" %d ", matrix[rlRow][col])
+		}
+		// 4.打印矩阵的最左列
+		for row := rlRow; row >= luRow+1; row-- {
+			fmt.Printf(" %d ", matrix[row][luCol])
+		}
+
+		luRow++
+		luCol++
+		rlRow--
+		rlCol--
+	}
+
+}
 ```
 
 
@@ -83,6 +209,65 @@
 ②内部循环即为 c-a 次，假设当前为第i次，那么就将第i组进行旋转，4个元素分别是：m[a][b+i] 、 m[a+i][d] 、 m[c][d-i] 、 m[c-i][d]   (起点的位置都很好想，分别是m[a][b] 、 m[a][b+1] 、 m[a][b+2] ; 余后的每一个位置都是上一个位置顺时针走i步得到的)
 ```
 
+```go
+package lesson4
+
+import "fmt"
+
+func NinetyRotation(matrix *[][]int) {
+	maxRow := len(*matrix) - 1
+	maxCol := len((*matrix)[0]) - 1
+
+	luRow := 0      // 左上角的行号
+	luCol := 0      // 左上角的列号
+	rlRow := maxRow // 右下角的行号
+	rlCol := maxCol // 右下角的列号
+
+	for {
+		if luRow > rlRow || luCol > rlCol { // 对于一个正方形矩阵，不可能出现左上角与右下角同行或同列，因此没有 ==
+			return
+		}
+
+		group := rlCol - luCol // 矩阵的当前圈被分成的组数，每一组固定会有4个点
+		for i := 0; i < group; i++ {
+			// 四个点的位置分别是 (luRow,luCol+i)  (luRow+i,rlCol) (rlRow,rlCol-i) (rlRow-i,luCol)
+			rotation(&(*matrix)[luRow][luCol+i], &(*matrix)[luRow+i][rlCol], &(*matrix)[rlRow][rlCol-i], &(*matrix)[rlRow-i][luCol])
+		}
+
+		// 更新左上角与右下角
+		luRow++
+		luCol++
+		rlRow--
+		rlCol--
+	}
+
+}
+
+func PrintMatrix(matrix [][]int) {
+	maxRow := len(matrix) - 1
+	maxCol := len(matrix[0]) - 1
+
+	for row := 0; row <= maxRow; row++ {
+		for col := 0; col <= maxCol; col++ {
+			fmt.Printf(" %d ", matrix[row][col])
+		}
+		fmt.Println()
+	}
+}
+
+func rotation(ele1, ele2, ele3, ele4 *int) {
+	val1 := *ele1
+	val2 := *ele2
+	val3 := *ele3
+	val4 := *ele4
+
+	*ele1 = val4
+	*ele2 = val1
+	*ele3 = val2
+	*ele4 = val3
+}
+```
+
 
 
 ## 四、题目四
@@ -113,6 +298,77 @@
 第六轮：15 12 
 第七轮：16
 ```
+
+```go
+package lesson4
+
+import "fmt"
+
+type Pos struct {
+	row int
+	col int
+}
+
+func ZigZag(matrix [][]int) {
+	maxRow := len(matrix) - 1
+	maxCol := len(matrix[0]) - 1
+
+	leftLower := Pos{0, 0}  // 对角线的左下角
+	rightUpper := Pos{0, 0} // 对角线的右上角
+
+	direction := true // 打印对角线时的方向
+
+	for {
+		if leftLower.row == maxRow && leftLower.col == maxCol { // 到达右下角
+			fmt.Printf(" %d \n", matrix[leftLower.row][leftLower.col])
+			return
+		}
+
+		if direction { // 从右上角到左下角顺序打印
+			start := rightUpper
+			end := leftLower
+
+			for {
+				if start.row == end.row && start.col == end.col {
+					fmt.Printf(" %d ", matrix[start.row][start.col])
+					break
+				}
+				fmt.Printf(" %d ", matrix[start.row][start.col])
+				start.row++
+				start.col--
+			}
+
+		} else { // 从左下角到右上角顺序打印
+			start := leftLower
+			end := rightUpper
+
+			for {
+				if start.row == end.row && start.col == end.col {
+					fmt.Printf(" %d ", matrix[start.row][start.col])
+					break
+				}
+				fmt.Printf(" %d ", matrix[start.row][start.col])
+				start.row--
+				start.col++
+			}
+		}
+
+		direction = !direction
+		if leftLower.row < maxRow {
+			leftLower.row++
+		} else {
+			leftLower.col++
+		}
+		if rightUpper.col < maxCol {
+			rightUpper.col++
+		} else {
+			rightUpper.row++
+		}
+	}
+}
+```
+
+
 
 ## 五、题目五
 
@@ -163,6 +419,39 @@ s = s + m
 因此，将s拼接到长度等于n时需要的最少操作步骤 =((a-1)+(b-1)+(c-1)+(d-1))
 ```
 
+```go
+package lesson4
+
+func SpStr(length int) int {
+	primeSet := Primefac(length)
+
+	res := 0
+	for _, v := range primeSet {
+		res += (v - 1)
+	}
+	return res
+}
+
+// 质因数分解
+func Primefac(n int) []int {
+	primeSet := make([]int, 0)
+
+	dividend := n // 被除数
+	for {
+		if dividend == 1 { // 被除数变为1，完成质因数分解
+			return primeSet
+		}
+		for div := 2; div <= dividend; div++ { // 除数从2开始，且必须小于等于被除数
+			if dividend%div == 0 { //能除尽
+				primeSet = append(primeSet, div)
+				dividend = dividend / div
+				break
+			}
+		}
+	}
+}
+```
+
 ## 六、题目六
 
 给定一个字符串类型的数组arr，求其中出现次数最多的前K个
@@ -188,5 +477,181 @@ s = s + m
 	② 小根堆已满，则需要判断当前字符串出现次数是否 大于 小根堆堆顶节点字符串出现次数，若大于则插入然后		heapify；若不不能，则不插入。
 
 需要注意：在进行heapify时，小根堆节点在进行位置交换时，需要更新定位表
+```
+
+```go
+package lesson4
+
+import "DataStructure2/utils"
+
+type Word struct {
+	Str   string // 单词字符串
+	Count int    // 单词出现的次数
+}
+
+func LessWord(a, b interface{}) bool {
+	aWord := a.(Word)
+	bWord := b.(Word)
+
+	if aWord.Count < bWord.Count {
+		return true
+	} else {
+		return false
+	}
+}
+
+type DymMostFreq struct {
+	FreqTable     map[string]int // 词频表
+	SmallRootHeap []interface{}  // 小根堆
+	SRHeapLoc     map[string]int // 记录单词在小根堆中的位置
+
+	K int // 只打印出现次数最多的k个单词
+}
+
+func NewDymMostFreq(k int) *DymMostFreq {
+	return &DymMostFreq{
+		FreqTable:     make(map[string]int),
+		SmallRootHeap: utils.NewHeap(make([]interface{}, 0, k), false, LessWord),
+		SRHeapLoc:     make(map[string]int),
+		K:             k,
+	}
+}
+
+// 小根堆完成一次heapify后,需要更新SRHeapLoc
+func Hook(srHeapLoc *map[string]int, a, b *interface{}) {
+	aWord := (*a).(Word)
+	bWord := (*b).(Word)
+	temp := (*srHeapLoc)[aWord.Str]
+	(*srHeapLoc)[aWord.Str] = (*srHeapLoc)[bWord.Str]
+	(*srHeapLoc)[bWord.Str] = temp
+}
+
+func (dmf *DymMostFreq) AddWord(word string) *DymMostFreq {
+	if _, ok := dmf.FreqTable[word]; ok {
+		dmf.FreqTable[word]++
+	} else {
+		dmf.FreqTable[word] = 1
+	}
+
+	if loc, ok := dmf.SRHeapLoc[word]; ok && loc != -1 { // 单词存在于小根堆上. 更新节点的出现次数后重新heapify
+		node := dmf.SmallRootHeap[loc].(Word)
+		node.Count++
+		dmf.SmallRootHeap[loc] = node
+		Heapify(dmf.SmallRootHeap, 0, len(dmf.SmallRootHeap), false, LessWord, Hook, &dmf.SRHeapLoc) // 需要重新调整SRHeapLoc
+	} else { // 单词不在小根堆上
+		if len(dmf.SmallRootHeap) < dmf.K { // 小根堆未满
+			newLoc := 0
+			newLoc = utils.HeapInsert(&dmf.SmallRootHeap, Word{Str: word, Count: 1}, false, LessWord)
+			dmf.SRHeapLoc[word] = newLoc
+		} else { // 小根堆已经满了，需要看堆顶元素是否可以被替换掉
+			topCount := dmf.SmallRootHeap[0].(Word).Count
+			if dmf.FreqTable[word] <= topCount {
+				dmf.SRHeapLoc[word] = -1
+			} else {
+				dmf.SRHeapLoc[dmf.SmallRootHeap[0].(Word).Str] = -1
+				dmf.SmallRootHeap[0] = Word{word, dmf.FreqTable[word]}
+				dmf.SRHeapLoc[word] = 0
+				Heapify(dmf.SmallRootHeap, 0, len(dmf.SmallRootHeap), false, LessWord, Hook, &dmf.SRHeapLoc)
+			}
+		}
+	}
+	return dmf
+}
+
+func (dmf *DymMostFreq) Pop() string {
+	var data interface{}
+	dmf.SmallRootHeap, data = PopAndheapify(dmf.SmallRootHeap, false, LessWord, Hook, &dmf.SRHeapLoc)
+	word := data.(Word)
+
+	dmf.FreqTable[word.Str]--
+	dmf.SRHeapLoc[word.Str] = -1
+
+	return word.Str
+}
+
+func Heapify(heap []interface{}, start, end int, form bool, less func(interface{}, interface{}) bool,
+	hook func(*map[string]int, *interface{}, *interface{}), srHeapLoc *map[string]int) {
+	currentIndex := start // 对以 heap[start]为根节点的子树进行heapify
+	leftChildIndex := currentIndex*2 + 1
+	rightChildIndex := currentIndex*2 + 2
+
+	for {
+		if leftChildIndex > end { // 没有任何孩子节点(最多到heap[end-1])
+			break
+		}
+		newRootIndex := currentIndex
+		if form { // 大根堆
+			// 获得当前节点 左右孩子 中较大节点的下标
+			maxIndex := leftChildIndex
+			max := heap[leftChildIndex]
+			if rightChildIndex <= len(heap)-1 { // 可能只有左孩子，没有右孩子
+				max = BackMax(heap[leftChildIndex], heap[rightChildIndex], less)
+				if max == heap[rightChildIndex] {
+					maxIndex = rightChildIndex
+				}
+			}
+			// 如果较大节点比根节点还要大，则交换两者
+			if less(heap[currentIndex], max) {
+				swap(&heap[maxIndex], &heap[currentIndex], hook, srHeapLoc)
+			}
+			newRootIndex = maxIndex
+		} else { // 小根堆
+			// 获得当前节点 左右孩子 中较小节点的下标
+			minIndex := leftChildIndex
+			min := heap[leftChildIndex]
+			if rightChildIndex <= len(heap)-1 { // 可能只有左孩子，没有右孩子
+				min = BackMin(heap[leftChildIndex], heap[rightChildIndex], less)
+				if min == heap[rightChildIndex] {
+					minIndex = rightChildIndex
+				}
+			}
+			// 如果较小节点比根节点还要小，则交换两者
+			if less(min, heap[currentIndex]) {
+				swap(&heap[minIndex], &heap[currentIndex], hook, srHeapLoc)
+			}
+			newRootIndex = minIndex
+		}
+		// 更新循环变量
+		currentIndex = newRootIndex
+		leftChildIndex = currentIndex*2 + 1
+		rightChildIndex = currentIndex*2 + 2
+	}
+}
+
+func PopAndheapify(heap []interface{}, form bool, less func(interface{}, interface{}) bool,
+	hook func(*map[string]int, *interface{}, *interface{}), srHeapLoc *map[string]int) ([]interface{}, interface{}) {
+
+	num := heap[0]              // 每次总是返回根堆的根节点
+	heap[0] = heap[len(heap)-1] // 让末尾的叶子结点替换掉根节点
+	heap = heap[:len(heap)-1]
+
+	// 将新的根节点下沉到合适的位置
+	Heapify(heap, 0, len(heap)-1, form, less, hook, srHeapLoc) // 注意：end必须是heapIndex - 1，作用是相当于heap[heapIndex]被删除
+	return heap, num
+}
+
+func BackMax(a, b interface{}, less func(interface{}, interface{}) bool) interface{} {
+	if less(a, b) {
+		return b
+	} else {
+		return a
+	}
+}
+
+func BackMin(a, b interface{}, less func(interface{}, interface{}) bool) interface{} {
+	if less(a, b) {
+		return a
+	} else {
+		return b
+	}
+}
+
+func swap(a, b *interface{}, hook func(*map[string]int, *interface{}, *interface{}), srHeapLoc *map[string]int) {
+
+	hook(srHeapLoc, a, b)
+	temp := *a
+	*a = *b
+	*b = temp
+}
 ```
 

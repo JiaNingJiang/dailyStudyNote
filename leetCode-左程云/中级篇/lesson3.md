@@ -15,6 +15,46 @@
 3.完成遍历后，我们返回dp数组中最大的值
 ```
 
+```go
+func LongestPstr(pstr string) int {
+	if len(pstr) == 0 {
+		return 0
+	}
+	dp := make([]int, len(pstr))
+
+	for i := 0; i < len(pstr); i++ {
+		if pstr[i] == '(' { // pstr[i] == '('
+			dp[i] = 0
+		} else { // pstr[i] == ')'
+			last := i - 1
+			if last < 0 { // dp[i-1]是越界的
+				continue
+			}
+			skipInterval := dp[i-1] + 1
+			if i-skipInterval < 0 || pstr[i-skipInterval] != '(' { // 跳跃点不存在或者不是'('
+				dp[i] = 0
+				continue
+			}
+			dp[i] = dp[i-1] + 2 // dp[i] 至少是 dp[i-1] + 2
+
+			aSkipInterval := skipInterval + 1 // 再往前多跳一个位置
+			if i-aSkipInterval >= 0 && dp[i-aSkipInterval] > 0 {
+				dp[i] += dp[i-aSkipInterval]
+			}
+		}
+	}
+	maxLen := math.MinInt
+	for i := 0; i < len(dp); i++ {
+		if dp[i] > maxLen {
+			maxLen = dp[i]
+		}
+	}
+	return maxLen
+}
+```
+
+
+
 ## 二、问题二
 
 对一个栈里的整型数据，按照升序进行排序（即排序前，栈里的数据是无序的，排序后最大元素位于栈底），要求最多只能使用一个额外的栈存放临时数据，但不能将元素复制到别的数据结构中。
@@ -26,6 +66,71 @@
 3.持续进行步骤2，直到栈中的元素全部转移到辅助栈。
 4.最后将辅助栈的元素全部弹出到栈中。
 ```
+
+```go
+// increase == true表示变成递增站；increase == false表示变成递减栈
+func Orderization(stack *utils.Stack, increase bool) {
+	aStack := utils.NewStack() // 辅助栈
+
+	// 将原始栈中的元素全部移动到辅助栈，同时保证辅助栈与原始栈的目标单调性相反
+	for {
+		if stack.Len == 0 {
+			break
+		}
+		ele := stack.Pop().(int) // 从原始栈中弹出一个元素
+
+		if aStack.Len == 0 { // 仅当辅助栈为空时可以直接加入到辅助栈
+			aStack.Push(ele)
+			continue
+		}
+		top := aStack.Top().(int)
+		if compare(ele, top, !increase) { // 需要确保辅助栈的栈顶元素与原始栈中弹出的元素符合相反的单调关系
+			aStack.Push(ele)
+		} else { // 如果不满足单调关系，则需要从辅助栈中持续弹出元素，直到符合单调关系或者辅助栈为空
+			for {
+				if aStack.Len == 0 {
+					aStack.Push(ele)
+					break
+				}
+				top := aStack.Top().(int)
+				if compare(ele, top, !increase) {
+					aStack.Push(ele)
+					break
+				}
+				data := aStack.Pop()
+				stack.Push(data)
+			}
+		}
+	}
+
+	for {
+		if aStack.Len == 0 {
+			return
+		}
+		data := aStack.Pop()
+		stack.Push(data)
+	}
+
+}
+
+func compare(original, assistTop int, increase bool) bool {
+	if increase {
+		if original > assistTop {
+			return true
+		} else {
+			return false
+		}
+	} else {
+		if original < assistTop {
+			return true
+		} else {
+			return false
+		}
+	}
+}
+```
+
+
 
 ## 三、问题三
 
@@ -55,6 +160,36 @@
 采用这种方式，要查找一个元素，最多需要经过 M+N 步。
 一旦在访问时发生了矩阵越界，那么意味着目标元素不在矩阵中。
 ```
+
+```go
+// 矩阵的每一行都是从小到大；每一列也是从小到大
+func SearchInMatrix(matrix [][]int, target int) bool {
+	maxRow := len(matrix) - 1    // 矩阵的最大行号
+	maxCol := len(matrix[0]) - 1 // 矩阵的最大列号
+
+	// 起点从矩阵的右上角开始(第0行，最后一列), 因此每次移动只能往下或者往左走
+	curRow := 0
+	curCol := maxCol
+	for {
+		if curRow < 0 || curRow > maxRow || curCol < 0 || curCol > maxCol {
+			return false
+		}
+		if matrix[curRow][curCol] == target {
+			return true
+		}
+		if matrix[curRow][curCol] > target { // 当前矩阵元素大于目标值，则往左走
+			curCol--
+			continue
+		}
+		if matrix[curRow][curCol] < target { // 当前矩阵元素小于目标值，则往下走
+			curRow++
+			continue
+		}
+	}
+}
+```
+
+
 
 ## 四、问题四
 
@@ -92,5 +227,31 @@
 第四行，max=4
 第五行，max=4
 第六行，max=5
+```
+
+```go
+package lesson3
+
+func MostOne(matrix [][]int) int {
+	maxRow := len(matrix) - 1
+	maxCol := len(matrix[0]) - 1
+
+	// 从矩阵的右上角开始
+	curRow := 0
+	curCol := maxCol
+
+	mostOne := 0
+	for {
+		if curRow < 0 || curRow > maxRow || curCol < 0 || curCol > maxCol {
+			return mostOne
+		}
+		if matrix[curRow][curCol] == 1 { // 当前位置是1，则累加1的个数，并向左走
+			mostOne++
+			curCol--
+		} else { // 当前位置是0,直接向下走
+			curRow++
+		}
+	}
+}
 ```
 
