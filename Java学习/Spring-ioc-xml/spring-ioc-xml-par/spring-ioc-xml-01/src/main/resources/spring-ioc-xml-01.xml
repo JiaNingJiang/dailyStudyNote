@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!-- 1. 无参构造函数的 ioc 声明   -->
+    <bean id="happyComponent" class="com.buptjjn.HappyComponent" />
+
+<!--2. 静态工厂的 ioc 声明-->
+    <bean id="clientService" class="com.buptjjn.ClientService" factory-method="createInstance" />
+
+<!--3. 非静态工厂的 ioc 声明    -->
+<!--3.1 配置工厂类的组件信息    -->
+    <bean id="defaultService" class="com.buptjjn.DefaultService" />
+<!--3.2 通过指定非静态工厂对象和方法名 配置ioc   -->
+    <bean id="clientService2" factory-bean="defaultService" factory-method="createClientServiceInstance" />
+</beans>
