@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!-- class 需要是对应的 BeanFactory 的全限定符   -->
+<!-- ioc 容器会创建两个 bean，一个就是所需的对象 bean(name)，另一个是 Factory 工厂的对象 bean(&name)   -->
+    <bean name="bean" class="com.buptjjn.ioc_05.JavaBeanFactory" />
+
+    <bean name="bean1" class="com.buptjjn.ioc_05.JavaBeanFactory">
+        <property name="age" value="18" />
+        <property name="name" value="小刚" />
+    </bean>
+
+</beans>

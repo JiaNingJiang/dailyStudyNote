@@ -1,4 +1,4 @@
-package com.buptjjn;
+package com.buptjjn.ioc_01;
 
 public class DefaultService {
     private static ClientServiceImpl clientService = new ClientServiceImpl();

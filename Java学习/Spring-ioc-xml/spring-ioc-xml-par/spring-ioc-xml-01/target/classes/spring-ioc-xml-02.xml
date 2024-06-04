@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+<!-- 1. 单个构造参数注入   -->
+    <bean id="userDao" class="com.buptjjn.ioc_02.User_DAO" />
+    <bean id="userService" class="com.buptjjn.ioc_02.User_Service">
+      <!-- 1.1 构造参数传值 di 的配置  value 和 ref 只能二选一
+      <constructor-arg value="" /> 传入直接数据类型
+      <constructor-arg ref="" /> 传入引用数据类型
+      -->
+        <constructor-arg ref="userDao"/>
+    </bean>
+
+
+<!-- 2. 多个构造参数注入 -->
+    <bean id="userService2" class="com.buptjjn.ioc_02.User_Service">
+        <!-- 2.1 按照参数顺序依次注入       -->
+        <constructor-arg ref="userDao" />
+        <constructor-arg value="18"/>
+        <constructor-arg value="小米"/>
+    </bean>
+    <bean id="userService3" class="com.buptjjn.ioc_02.User_Service">
+        <!-- 2.2 按照指定的参数名称进行注入       -->
+        <constructor-arg name="age" value="18" />
+        <constructor-arg name="name" value="小兰"/>
+        <constructor-arg name="userDao" ref="userDao"/>
+    </bean>
+    <bean id="userService4" class="com.buptjjn.ioc_02.User_Service">
+        <!-- 2.3 按照指定的参数下标进行注入       -->
+        <constructor-arg index="0" ref="userDao" />
+        <constructor-arg index="1" value="18"/>
+        <constructor-arg index="2" value="小可"/>
+    </bean>
+
+<!-- 3. 基于 Setter 方法进行依赖注入   -->
+    <bean id="userService5" class="com.buptjjn.ioc_02.User_Service">
+<!-- 3.1  name="xxx" xxx 应该是对应的 Setter 方法去掉 Set，同时将剩余的单词首字母小写后的样子  -->
+<!-- 3.2  ref="" 或者 value="" 是二选一的     -->
+        <property name="userDao" ref="userDao" />
+        <property name="age" value="20"/>
+        <property name="name" value="小刚"/>
+    </bean>
+
+
+</beans>

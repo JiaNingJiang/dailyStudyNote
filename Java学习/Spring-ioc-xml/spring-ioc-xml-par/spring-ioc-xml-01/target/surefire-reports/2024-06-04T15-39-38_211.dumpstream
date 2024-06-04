@@ -1,0 +1,5 @@
+# Created at 2024-06-04T15:39:59.698
+Boot Manifest-JAR contains absolute paths in classpath 'E:\GitHub\dailyStudyNote\Java学习\Spring-ioc-xml\spring-ioc-xml-par\spring-ioc-xml-01\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+
