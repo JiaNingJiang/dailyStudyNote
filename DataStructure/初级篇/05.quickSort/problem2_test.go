@@ -9,8 +9,8 @@ import (
 )
 
 func TestDutchFlag(t *testing.T) {
-	arr := []int{49, 61, 23, 10, 1, 1, 1}
-	target := 23
+	arr := []int{47, 61, 34, 76, 54, 13, 34, 97}
+	target := 48
 	//arr := []int{2, 4, 4, 3, 7, 1, 4, 6}
 	//target := 4
 	DutchFlag(arr, target)
